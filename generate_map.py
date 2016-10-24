@@ -1,80 +1,21 @@
 import random
 from itertools import *
 
-land_tiles = []
-land_tile_options = []
-
-def get_rand_loc():
-	loc = 1
-	while not loc == '01':
-		x_coord = random.randint(0,x_len-1)
-		y_coord = random.randint(0,y_len-1)
-		loc = new_map[y_coord][x_coord]
-	return {'x':x_coord,'y':y_coord}
-
-def shift(coord,i,shift):
-	ret = None
-	if shift == 'b' or shift == 'r':
-		if coord == i:
-			ret = 0
-		else:
-			ret = coord + 1
-	if shift == 't' or shift == 'l':
-		if coord == 0:
-			ret = i
-		else:
-			ret = coord - 1
-	return ret
-
-def get_adjacent(x,y):
-	ret = []
-	for d in ['l','r']:
-		new_x = shift(x,x_len-1,d)
-		ret.append({'d':d,'x':new_x,'y':y,'i':str(new_x)+','+str(y)})
-
-	for d in ['t','b']:
-		new_y = shift(y,y_len-1,d)
-		ret.append({'d':d,'y':new_y,'x':x,'i':str(x)+','+str(new_y)})
-		for corner in ['l','r']:
-			new_x = shift(x,x_len-1,corner)
-			new_y = shift(y,y_len-1,d)
-			ret.append({'d':d+corner,'x':new_x,'y':new_y,'i':str(new_x)+','+str(new_y)})
-
-	return ret
-
-def get_adjacent_no_diagonal(x,y):
-	ret = []
-	for d in ['l','r']:
-		new_x = shift(x,x_len-1,d)
-		ret.append({'d':d,'x':new_x,'y':y,'i':str(new_x)+','+str(y)})
-
-	for d in ['t','b']:
-		new_y = shift(y,y_len-1,d)
-		ret.append({'d':d,'y':new_y,'x':x,'i':str(x)+','+str(new_y)})
-
-	return ret
-
+# Initial variables
 x_len = 80
 y_len = 80
 land_perc = .75
 land_num_tiles = land_perc * x_len * y_len
 continents = 20
 rivers = 20
-
 new_map = []
-
-
-row = 0
-for y in range(y_len):
-	new_map.append([])
-	col = 0
-	for x in range(x_len):
-		new_map[row].append('0' + str(random.randint(1,4)))
-		col += 1
-	row += 1
+reset_coastline_num = 3
+land_tiles = []
+land_tile_options = []
+chosen_land_tiles = []
+river_spawn_points = []
 all_tiles = ['01','02','03','04','05','06','07','08','09','0A','0B','0C','0D','0E','0F','10','11','12','13','14','15','16','17','18','19','1A','1B','1C','1D','1E','1F','20','21','22','23','24','25','26','27','28','29','2A','2B','2C','2D','2E','2F','30','31','32','33','34','35','36','37','38','39','3A','3B','3C','3D','3E','3F','40','41','42','43','44','45','46','47','48','49','4A','4B','4C','4D','4E','4F','50','51','52','53','54','55','56','57','58','59','5A','5B','5C','5D','5E','5F','60','61','62','63','64','65','66','67','68','69','6A','6B','6C','6D','6E','6F','70','71','72','73','74']
 sea_all = ['01','02','03','04']
-land_all = []
 
 opposing = {
 	't':'b',
@@ -206,10 +147,7 @@ tiles = {
 	'74':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
 }
 
-for key, value in tiles.iteritems():
-	if not value['t'] == '':
-		land_all.append(key)
-
+# Dynamically set tile_sets, can be replaced with static variable or separated from code
 tile_sets = {}
 
 for tile in tiles:
@@ -218,82 +156,143 @@ for tile in tiles:
 		for adjacent_tile in tiles:
 			if not tiles[adjacent_tile]['t'] == '':
 				for key, value in opposing.iteritems():				
-					if tiles[tile][key] == tiles[adjacent_tile][value] or tiles[tile][key] == '?' or tiles[adjacent_tile][value] == '?':
-						tile_sets[tile][key].append(adjacent_tile)
+					for left in tiles[tile][key]:
+						for right in tiles[adjacent_tile][value]:
+							if left == right or tiles[tile][key] == '?' or tiles[adjacent_tile][value] == '?':
+								tile_sets[tile][key].append(adjacent_tile)
 
-chosen_land_tiles = []
+# Dynamically set land_all, can be replaced with static variable once all tiles are set or separated from code
+land_all = []
 
-for i in range(continents):
-	c = get_rand_loc()
-	c['i'] = str(c['x'])+','+str(c['y'])
-	chosen_land_tiles.append(c['i'])
-	land_tile_options += get_adjacent_no_diagonal(c['x'],c['y'])
-	land_tiles.append(c)
-	new_map[c['y']][c['x']] = '19' #land_all[random.randint(0,len(land_all)-1)]
-
-
-cid = c['i']
-
-while len(land_tiles) < land_num_tiles:
-	while cid in chosen_land_tiles:
-		idx = random.randint(0,len(land_tile_options)-1)
-		c = land_tile_options[idx]
-		cid = land_tile_options[idx]['i']
-	del land_tile_options[idx]
-	chosen_land_tiles.append(cid)
-	new_map[c['y']][c['x']] = '19' #land_all[random.randint(0,len(land_all)-1)]
-	land_tiles.append(c)
-	for opt in get_adjacent_no_diagonal(c['x'],c['y']):
-		if opt not in land_tiles:
-			land_tile_options.append(opt)
-
-for l_tile in land_tiles:
-	sets = []
-	#print l_tile
-	for adj in get_adjacent(l_tile['x'],l_tile['y']):
-		sets.append(set(tile_sets[new_map[adj['y']][adj['x']]][opposing[adj['d']]])) 
-	intersect = set(all_tiles).intersection(*sets)
-	if len(intersect) > 0:
-		new_map[l_tile['y']][l_tile['x']] = list(intersect)[random.randint(0,len(intersect)-1)]
-	else:
-		new_map[l_tile['y']][l_tile['x']] = '0' + str(random.randint(1,4))
-
-for l_tile in land_tiles:
-	sets = []
-	#print l_tile
-	for adj in get_adjacent(l_tile['x'],l_tile['y']):
-		sets.append(set(tile_sets[new_map[adj['y']][adj['x']]][opposing[adj['d']]])) 
-	intersect = set(all_tiles).intersection(*sets)
-	if len(intersect) > 0:
-		new_map[l_tile['y']][l_tile['x']] = list(intersect)[random.randint(0,len(intersect)-1)]
-	else:
-		new_map[l_tile['y']][l_tile['x']] = '0' + str(random.randint(1,4))
-
-river_spawn_points = []
-
-for l_tile in land_tiles:
-	sets = []
-	#print l_tile
-	for adj in get_adjacent(l_tile['x'],l_tile['y']):
-		sets.append(set(tile_sets[new_map[adj['y']][adj['x']]][opposing[adj['d']]])) 
-	intersect = set(all_tiles).intersection(*sets)
-	if len(intersect) > 0:
-		t = list(intersect)[random.randint(0,len(intersect)-1)]
-		new_map[l_tile['y']][l_tile['x']] = t
-		if t == '10':
-			river_spawn_points.append(l_tile)
-
-#print river_spawn_points
-#print len(river_spawn_points)
-
-# Homeport spawn
+for key, value in tiles.iteritems():
+	if not value['t'] == '':
+		land_all.append(key)
 
 
-f = open("out.txt", "w")
-f.seek(0)
-for map_row in new_map:
-	for map_col in map_row:
-		f.write(map_col)
-f.truncate()
-f.close()
+# Find random continent seed location on map that has not already been written
+def get_rand_loc():
+	loc = ''
+	while not loc == '01':
+		x_coord = random.randint(0,x_len-1)
+		y_coord = random.randint(0,y_len-1)
+		loc = new_map[y_coord][x_coord]
+	return {'x':x_coord,'y':y_coord}
 
+# Given coordinate on single axis, axis_length, and direction to shift, return new coordinate
+def shift(coord,axis_length,direction):
+	ret = None
+	if direction == 'b' or direction == 'r':
+		if coord == axis_length:
+			ret = 0
+		else:
+			ret = coord + 1
+	if direction == 't' or direction == 'l':
+		if coord == 0:
+			ret = axis_length
+		else:
+			ret = coord - 1
+	return ret
+
+# Given a coordinate, return 8 adjacent coordinates
+def get_adjacent(x,y):
+	ret = []
+	for d in ['l','r']:
+		new_x = shift(x,x_len-1,d)
+		ret.append({'d':d,'x':new_x,'y':y,'i':str(new_x)+','+str(y)})
+
+	for d in ['t','b']:
+		new_y = shift(y,y_len-1,d)
+		ret.append({'d':d,'y':new_y,'x':x,'i':str(x)+','+str(new_y)})
+		for corner in ['l','r']:
+			new_x = shift(x,x_len-1,corner)
+			new_y = shift(y,y_len-1,d)
+			ret.append({'d':d+corner,'x':new_x,'y':new_y,'i':str(new_x)+','+str(new_y)})
+	return ret
+
+# Given a coordinate, return 4 adjacent coordinates excluding diagonals
+def get_adjacent_no_diagonal(x,y):
+	ret = []
+	for d in ['l','r']:
+		new_x = shift(x,x_len-1,d)
+		ret.append({'d':d,'x':new_x,'y':y,'i':str(new_x)+','+str(y)})
+
+	for d in ['t','b']:
+		new_y = shift(y,y_len-1,d)
+		ret.append({'d':d,'y':new_y,'x':x,'i':str(x)+','+str(new_y)})
+
+	return ret
+
+#Create a map of random sea tiles
+def create_sea():
+	ret = []
+	row = 0
+	for y in range(y_len):
+		ret.append([])
+		col = 0
+		for x in range(x_len):
+			ret[row].append('0' + str(random.randint(1,4)))
+			col += 1
+		row += 1
+	return ret
+
+
+# Choose
+def seed_continents():
+	for i in range(continents):
+		c = get_rand_loc()
+		c['i'] = str(c['x'])+','+str(c['y'])
+		chosen_land_tiles.append(c['i'])
+		land_tile_options.extend(get_adjacent_no_diagonal(c['x'],c['y']))
+		land_tiles.append(c)
+		new_map[c['y']][c['x']] = '19' #land_all[random.randint(0,len(land_all)-1)]
+
+
+
+def build_continents():
+	cid = chosen_land_tiles[0]
+	while len(land_tiles) < land_num_tiles:
+		while cid in chosen_land_tiles:
+			idx = random.randint(0,len(land_tile_options)-1)
+			c = land_tile_options[idx]
+			cid = land_tile_options[idx]['i']
+		del land_tile_options[idx]
+		chosen_land_tiles.append(cid)
+		new_map[c['y']][c['x']] = '19' #land_all[random.randint(0,len(land_all)-1)]
+		land_tiles.append(c)
+		for opt in get_adjacent_no_diagonal(c['x'],c['y']):
+			if opt not in land_tiles:
+				land_tile_options.append(opt)
+
+def set_coastlines(last=False):
+	for l_tile in land_tiles:
+		sets = []
+		#print l_tile
+		for adj in get_adjacent(l_tile['x'],l_tile['y']):
+			sets.append(set(tile_sets[new_map[adj['y']][adj['x']]][opposing[adj['d']]])) 
+		intersect = set(all_tiles).intersection(*sets)
+		if len(intersect) > 0:
+			t = list(intersect)[random.randint(0,len(intersect)-1)]
+			new_map[l_tile['y']][l_tile['x']] = t
+			if t == '10' and last:
+				river_spawn_points.append(l_tile)
+		elif not last:
+			new_map[l_tile['y']][l_tile['x']] = '0' + str(random.randint(1,4))
+
+def write_file():
+	f = open("out.txt", "w")
+	f.seek(0)
+	for map_row in new_map:
+		for map_col in map_row:
+			f.write(map_col)
+	f.truncate()
+	f.close()
+
+new_map = create_sea()
+seed_continents()
+build_continents()
+i = 0
+while not i == reset_coastline_num-2:
+	set_coastlines()
+	i += 1
+set_coastlines(True)
+write_file()

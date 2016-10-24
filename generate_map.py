@@ -56,15 +56,12 @@ def get_adjacent_no_diagonal(x,y):
 
 x_len = 80
 y_len = 80
-land_perc = .4
+land_perc = .75
 land_num_tiles = land_perc * x_len * y_len
 continents = 20
+rivers = 20
 
 new_map = []
-up = []
-rt = []
-lt = []
-dn = []
 
 
 row = 0
@@ -77,8 +74,7 @@ for y in range(y_len):
 	row += 1
 all_tiles = ['01','02','03','04','05','06','07','08','09','0A','0B','0C','0D','0E','0F','10','11','12','13','14','15','16','17','18','19','1A','1B','1C','1D','1E','1F','20','21','22','23','24','25','26','27','28','29','2A','2B','2C','2D','2E','2F','30','31','32','33','34','35','36','37','38','39','3A','3B','3C','3D','3E','3F','40','41','42','43','44','45','46','47','48','49','4A','4B','4C','4D','4E','4F','50','51','52','53','54','55','56','57','58','59','5A','5B','5C','5D','5E','5F','60','61','62','63','64','65','66','67','68','69','6A','6B','6C','6D','6E','6F','70','71','72','73','74']
 sea_all = ['01','02','03','04']
-land_all = ['05','06','07','08','09','0A','0B','0C','0D','0E','0F','10','11','12','13','14','15','16','17','18','19','1A','1B','1C','1D','1E','1F','20','21','22','23','24','25','26','27','28','29','2A','2B','2C','2D','2E','2F','30','31','32','33','34','35','36','37','38','39','3A','3B','3C','3D','3E','3F','40','41','42','43','44','45','46','47','48','49','4A','4B','4C','4D','4E','4F','50','51','52','53','54','55','56','57','58','59','5A','5B','5C','5D','5E','5F','60','61','62','63','64','65','66','67','68','69','6A','6B','6C','6D','6E','6F','70','71','72','73','74']
-
+land_all = []
 
 opposing = {
 	't':'b',
@@ -96,26 +92,26 @@ tiles = {
 	'02':{'t':'S','r':'S','b':'S','l':'S','tr':'S','br':'S','tl':'S','bl':'S'},
 	'03':{'t':'S','r':'S','b':'S','l':'S','tr':'S','br':'S','tl':'S','bl':'S'},
 	'04':{'t':'S','r':'S','b':'S','l':'S','tr':'S','br':'S','tl':'S','bl':'S'},
-	'05':{'t':'L','r':'L','b':'S','l':'S','tr':'L','br':'S','tl':'S','bl':'S'},
-	'06':{'t':'L','r':'S','b':'S','l':'L','tr':'S','br':'S','tl':'L','bl':'S'},
-	'07':{'t':'S','r':'S','b':'L','l':'L','tr':'S','br':'S','tl':'S','bl':'L'},
-	'08':{'t':'S','r':'L','b':'L','l':'S','tr':'L','br':'L','tl':'S','bl':'S'},
+	'05':{'t':'L','r':'L','b':'S','l':'S','tr':'L','br':'?','tl':'?','bl':'?'},
+	'06':{'t':'L','r':'S','b':'S','l':'L','tr':'?','br':'?','tl':'L','bl':'?'},
+	'07':{'t':'S','r':'S','b':'L','l':'L','tr':'?','br':'?','tl':'?','bl':'L'},
+	'08':{'t':'S','r':'L','b':'L','l':'S','tr':'?','br':'L','tl':'?','bl':'?'},
 	'09':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'S','l':'L','tl':'L'},
 	'0A':{'t':'L','tr':'L','r':'L','br':'S','b':'L','bl':'L','l':'L','tl':'L'},
-	'0B':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
+	'0B':{'t':'L','tr':'S','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'0C':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'S'},
-	'0D':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'S','l':'S','tl':'S'},
-	'0E':{'t':'L','tr':'L','r':'L','br':'S','b':'S','bl':'S','l':'L','tl':'L'},
-	'0F':{'t':'L','tr':'S','r':'S','br':'S','b':'L','bl':'L','l':'L','tl':'L'},
-	'10':{'t':'S','tr':'S','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'S'},
-	'11':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'S','l':'L','tl':'L'},
-	'12':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'S'},
-	'13':{'t':'L','tr':'L','r':'L','br':'S','b':'S','bl':'S','l':'S','tl':'S'},
-	'14':{'t':'L','tr':'S','r':'S','br':'S','b':'S','bl':'L','l':'L','tl':'L'},
-	'15':{'t':'S','tr':'S','r':'S','br':'S','b':'L','bl':'L','l':'L','tl':'S'},
-	'16':{'t':'S','tr':'S','r':'L','br':'L','b':'L','bl':'S','l':'S','tl':'S'},
-	'17':{'t':'L','tr':'S','r':'S','br':'S','b':'L','bl':'L','l':'L','tl':'L'},
-	'18':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'S','l':'S','tl':'S'},
+	'0D':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'?','l':'S','tl':'?'},
+	'0E':{'t':'L','tr':'L','r':'L','br':'?','b':'S','bl':'?','l':'L','tl':'L'},
+	'0F':{'t':'L','tr':'?','r':'S','br':'?','b':'L','bl':'L','l':'L','tl':'L'},
+	'10':{'t':'S','tr':'?','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'?'},
+	'11':{'t':'L','tr':'S','r':'L','br':'L','b':'L','bl':'S','l':'L','tl':'L'},
+	'12':{'t':'L','tr':'L','r':'L','br':'S','b':'L','bl':'L','l':'L','tl':'S'},
+	'13':{'t':'L','tr':'L','r':'L','br':'?','b':'S','bl':'?','l':'S','tl':'?'},
+	'14':{'t':'L','tr':'?','r':'S','br':'?','b':'S','bl':'?','l':'L','tl':'L'},
+	'15':{'t':'S','tr':'?','r':'S','br':'?','b':'L','bl':'L','l':'L','tl':'?'},
+	'16':{'t':'S','tr':'?','r':'L','br':'L','b':'L','bl':'?','l':'S','tl':'?'},
+	'17':{'t':'L','tr':'?','r':'S','br':'?','b':'L','bl':'L','l':'L','tl':'L'},
+	'18':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'?','l':'S','tl':'?'},
 	'19':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'1A':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'1B':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
@@ -130,7 +126,7 @@ tiles = {
 	'24':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
 	'25':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
 	'26':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'27':{'t':'L','tr':'S','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
+	'27':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'28':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'29':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'2A':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
@@ -151,31 +147,31 @@ tiles = {
 	'39':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
 	'3A':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
 	'3B':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'3C':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'3D':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'3E':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'3F':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'40':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'41':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'42':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'43':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'44':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'45':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'46':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'47':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'48':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'49':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'4A':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'4B':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'4C':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'4D':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'4E':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'4F':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'50':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'51':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'52':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'53':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'54':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
+	'3C':{'t':'R','tr':'L','r':'L','br':'L','b':'R','bl':'L','l':'L','tl':'L'},
+	'3D':{'t':'R','tr':'L','r':'R','br':'L','b':'R','bl':'L','l':'L','tl':'L'},
+	'3E':{'t':'L','tr':'L','r':'R','br':'L','b':'L','bl':'L','l':'R','tl':'L'},
+	'3F':{'t':'L','tr':'L','r':'R','br':'L','b':'R','bl':'L','l':'L','tl':'L'},
+	'40':{'t':'R','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'R','tl':'L'},
+	'41':{'t':'R','tr':'L','r':'R','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
+	'42':{'t':'L','tr':'L','r':'L','br':'L','b':'R','bl':'L','l':'R','tl':'L'},
+	'43':{'t':'L','tr':'L','r':'L','br':'L','b':'R','bl':'L','l':'L','tl':'L'},
+	'44':{'t':'L','tr':'L','r':'R','br':'L','b':'L','bl':'?','l':'S','tl':'?'},
+	'45':{'t':'S','tr':'?','r':'L','br':'L','b':'R','bl':'L','l':'L','tl':'?'},
+	'46':{'t':'R','tr':'L','r':'L','br':'?','b':'S','bl':'?','l':'L','tl':'L'},
+	'47':{'t':'L','tr':'?','r':'S','br':'?','b':'L','bl':'L','l':'R','tl':'L'},
+	'48':{'t':'L','tr':'L','r':'L','br':'L','b':'R','bl':'L','l':'L','tl':'L'},
+	'49':{'t':'R','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
+	'4A':{'t':'L','tr':'L','r':'R','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
+	'4B':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'R','tl':'L'},
+	'4C':{'t':'L','tr':'L','r':'P','br':'P','b':'P','bl':'L','l':'L','tl':'L'},
+	'4D':{'t':'L','tr':'L','r':'P','br':'P','b':'P','bl':'P','l':'P','tl':'L'},
+	'4E':{'t':'L','tr':'L','r':'L','br':'L','b':'P','bl':'P','l':'P','tl':'L'},
+	'4F':{'t':'P','tr':'P','r':'P','br':'P','b':'P','bl':'L','l':'L','tl':'L'},
+	'50':{'t':'P','tr':'P','r':'P','br':'P','b':'P','bl':'P','l':'P','tl':'P'},
+	'51':{'t':'P','tr':'L','r':'L','br':'L','b':'P','bl':'P','l':'P','tl':'P'},
+	'52':{'t':'P','tr':'P','r':'P','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
+	'53':{'t':'P','tr':'P','r':'P','br':'L','b':'L','bl':'L','l':'P','tl':'P'},
+	'54':{'t':'P','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'P','tl':'P'},
 	'55':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
 	'56':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
 	'57':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
@@ -210,6 +206,10 @@ tiles = {
 	'74':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
 }
 
+for key, value in tiles.iteritems():
+	if not value['t'] == '':
+		land_all.append(key)
+
 tile_sets = {}
 
 for tile in tiles:
@@ -217,22 +217,9 @@ for tile in tiles:
 		tile_sets[tile] = {'t':[],'r':[],'b':[],'l':[],'tr':[],'br':[],'tl':[],'bl':[]}
 		for adjacent_tile in tiles:
 			if not tiles[adjacent_tile]['t'] == '':
-				if tiles[tile]['t'] == tiles[adjacent_tile]['b'] or tiles[tile]['t'] == 'SL':
-					tile_sets[tile]['t'].append(adjacent_tile)
-				if tiles[tile]['tr'] == tiles[adjacent_tile]['bl'] or tiles[tile]['tr'] == 'SL':
-					tile_sets[tile]['tr'].append(adjacent_tile)
-				if tiles[tile]['r'] == tiles[adjacent_tile]['l'] or tiles[tile]['r'] == 'SL':
-					tile_sets[tile]['r'].append(adjacent_tile)
-				if tiles[tile]['br'] == tiles[adjacent_tile]['tl'] or tiles[tile]['br'] == 'SL':
-					tile_sets[tile]['br'].append(adjacent_tile)
-				if tiles[tile]['b'] == tiles[adjacent_tile]['t'] or tiles[tile]['b'] == 'SL':
-					tile_sets[tile]['b'].append(adjacent_tile)
-				if tiles[tile]['bl'] == tiles[adjacent_tile]['tr'] or tiles[tile]['bl'] == 'SL':
-					tile_sets[tile]['bl'].append(adjacent_tile)
-				if tiles[tile]['l'] == tiles[adjacent_tile]['r'] or tiles[tile]['l'] == 'SL':
-					tile_sets[tile]['l'].append(adjacent_tile)
-				if tiles[tile]['tl'] == tiles[adjacent_tile]['br'] or tiles[tile]['tl'] == 'SL':
-					tile_sets[tile]['tl'].append(adjacent_tile)
+				for key, value in opposing.iteritems():				
+					if tiles[tile][key] == tiles[adjacent_tile][value] or tiles[tile][key] == '?' or tiles[adjacent_tile][value] == '?':
+						tile_sets[tile][key].append(adjacent_tile)
 
 chosen_land_tiles = []
 
@@ -242,7 +229,7 @@ for i in range(continents):
 	chosen_land_tiles.append(c['i'])
 	land_tile_options += get_adjacent_no_diagonal(c['x'],c['y'])
 	land_tiles.append(c)
-	new_map[c['y']][c['x']] = '19'
+	new_map[c['y']][c['x']] = '19' #land_all[random.randint(0,len(land_all)-1)]
 
 
 cid = c['i']
@@ -254,7 +241,7 @@ while len(land_tiles) < land_num_tiles:
 		cid = land_tile_options[idx]['i']
 	del land_tile_options[idx]
 	chosen_land_tiles.append(cid)
-	new_map[c['y']][c['x']] = '19'
+	new_map[c['y']][c['x']] = '19' #land_all[random.randint(0,len(land_all)-1)]
 	land_tiles.append(c)
 	for opt in get_adjacent_no_diagonal(c['x'],c['y']):
 		if opt not in land_tiles:
@@ -263,7 +250,7 @@ while len(land_tiles) < land_num_tiles:
 for l_tile in land_tiles:
 	sets = []
 	#print l_tile
-	for adj in get_adjacent_no_diagonal(l_tile['x'],l_tile['y']):
+	for adj in get_adjacent(l_tile['x'],l_tile['y']):
 		sets.append(set(tile_sets[new_map[adj['y']][adj['x']]][opposing[adj['d']]])) 
 	intersect = set(all_tiles).intersection(*sets)
 	if len(intersect) > 0:
@@ -274,13 +261,32 @@ for l_tile in land_tiles:
 for l_tile in land_tiles:
 	sets = []
 	#print l_tile
-	for adj in get_adjacent_no_diagonal(l_tile['x'],l_tile['y']):
+	for adj in get_adjacent(l_tile['x'],l_tile['y']):
 		sets.append(set(tile_sets[new_map[adj['y']][adj['x']]][opposing[adj['d']]])) 
 	intersect = set(all_tiles).intersection(*sets)
 	if len(intersect) > 0:
 		new_map[l_tile['y']][l_tile['x']] = list(intersect)[random.randint(0,len(intersect)-1)]
 	else:
-		pass
+		new_map[l_tile['y']][l_tile['x']] = '0' + str(random.randint(1,4))
+
+river_spawn_points = []
+
+for l_tile in land_tiles:
+	sets = []
+	#print l_tile
+	for adj in get_adjacent(l_tile['x'],l_tile['y']):
+		sets.append(set(tile_sets[new_map[adj['y']][adj['x']]][opposing[adj['d']]])) 
+	intersect = set(all_tiles).intersection(*sets)
+	if len(intersect) > 0:
+		t = list(intersect)[random.randint(0,len(intersect)-1)]
+		new_map[l_tile['y']][l_tile['x']] = t
+		if t == '10':
+			river_spawn_points.append(l_tile)
+
+#print river_spawn_points
+#print len(river_spawn_points)
+
+# Homeport spawn
 
 
 f = open("out.txt", "w")

@@ -33,6 +33,7 @@ Todos
 * Support for beginning percentage of map discovered by all players - currently setting the map discovery region to hex code 1F for all bytes reveals the entire world to all players
 * Command line prompt for variables
 * Write to full saved file and write straight to hex code
+* Optimize preformance and organize code
 
 Why?
 
@@ -40,12 +41,12 @@ I started this because I loved this game as a kid and I am currently trying to l
 
 How it works:
 
-1. The script starts by creatuing an 80x80 ocean. There are 4 ocean tiles with hex codes: 01, 02, 03, 04
+1. The script starts by creating an 80x80 ocean. There are 4 ocean tiles with hex codes: 01, 02, 03, 04
 2. It then chooses continent spawn points depending on how many you set and creates generic land tiles in those spawn points
 3. From the continent spawn points the script randomly chooses tiles adjacent to existing land tiles to build continents
 4. Continents build until the number of land tiles hits the set threshold
-5. Iterate through each land tile
-6. For each land tile look at all adjacent tiles, figure out what the tile in question should be by doing an intersection of what the adjacent tiles require (sea, land, etc.), randomly choose a tile from the intersection
-7. If no intersection can be found then a tile may not exist (game didn't account for such a land/sea configuration in their tileset), set the tile to a sea tile. This normalizes the landmasses so that each tile can be appropriately accounted for.
-8. Run step 6 again to account for the fact that sea tiles may have been written after land tiles were chosen. 
+5. The script then iterates through each land tile
+6. For each land tile all 8 adjacent tiles (up, down, and diagonal) are identified, each adjacent tile contributes a set of acceptable tiles based on the position of the adjacent tile in respect to the tile in question, an intersection of all acceptable adjacent tile sets is run, a tile is randomly chosen from the resulting set.
+7. If no intersection can be found then a tile may not exist. The game doesn't account for certain coastal configurations. In this case the land tile is set to a sea tile. Setting tiles with unknown configurations to sea tiles allows for the normalization of coastal configurations, thus decreasing the number of coastal tile errors.
+8. Run step 6 two more times to account for the fact that sea tiles may have been written after adjacent land tiles were chosen. 
 9. Write to out.txt and exit

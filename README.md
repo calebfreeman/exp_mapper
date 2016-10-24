@@ -6,7 +6,8 @@ Python script for generating World of Exploration DOS game random maps
 3. Run the script using "python generate_map.py"
 4. In the same folder as the script an "out.txt" file containing hexidemical code will be created. Copy this file into a saved game to overwrite the existing map in that game. Overwrite the first 64000 bytes, no more and no less, otherwise the saved file will be corrupted.
 
-Todos:
+Todos
+
 1. Fix coastal tiles, corners are not rendering correctly
 2. Add support for remaining land tiles - mountains, deserts, tundra, and ice
 3. Set indian villages and incan cities to spawn on land

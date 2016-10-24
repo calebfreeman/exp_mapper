@@ -7,7 +7,8 @@ y_len = 80
 land_perc = .75
 land_num_tiles = land_perc * x_len * y_len
 continents = 20
-rivers = 20
+rivers = (land_num_tiles * .7)/5
+river_length = 2
 new_map = []
 reset_coastline_num = 3
 land_tiles = []
@@ -27,6 +28,38 @@ opposing = {
 	'l':'r',
 	'tl':'br'
 }
+
+river_spawn_tiles = {
+	'0D': '44', #sea on left
+	'0E' : '46', #sea on bottom
+	'0F' : '47', #sea on right
+	'10' : '45', #sea on top
+	'1B' : '43',
+	'1C' : '48',
+	'1D' : '49',
+	'1E' : '4A',
+	'1F' : '4B'
+	
+}
+
+river_spawn_tiles2 = {
+	'44' : '0D', #sea on left
+	'46' : '0E', #sea on bottom
+	'47' : '0F', #sea on right
+	'45' : '10' #sea on top
+}
+
+coastal_tiles = ['01','02','03','04','05','06','07','08','09','0A','0B','0C','0D','0E','0F','10','11','12','13','14','15','16','17','18','44','45','46','47']
+
+inland_tiles = []
+river_tiles = ['3D','3C','3E','3F','40','41','43','48','49','4A','4B'] 
+
+for each in range(river_length):
+	river_tiles = ['3C','3E','3F','40','41'] + river_tiles
+
+
+
+#river_tiles = ['3C','3E','3F','40','41','43','48','49','4A','4B'] # Even probability, 42 & 3D removed
 
 tiles = {
 	'01':{'t':'S','r':'S','b':'S','l':'S','tr':'S','br':'S','tl':'S','bl':'S'},
@@ -100,7 +133,7 @@ tiles = {
 	'45':{'t':'S','tr':'?','r':'L','br':'L','b':'R','bl':'L','l':'L','tl':'?'},
 	'46':{'t':'R','tr':'L','r':'L','br':'?','b':'S','bl':'?','l':'L','tl':'L'},
 	'47':{'t':'L','tr':'?','r':'S','br':'?','b':'L','bl':'L','l':'R','tl':'L'},
-	'48':{'t':'L','tr':'L','r':'L','br':'L','b':'R','bl':'L','l':'L','tl':'L'},
+	'48':{'t':'L','tr':'L','r':'L','br':'L','b':'R','bl':'L','l':'L','tl':'L'}, 
 	'49':{'t':'R','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'4A':{'t':'L','tr':'L','r':'R','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'4B':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'R','tl':'L'},
@@ -170,6 +203,7 @@ for key, value in tiles.iteritems():
 
 
 # Find random continent seed location on map that has not already been written
+
 def get_rand_loc():
 	loc = ''
 	while not loc == '01':
@@ -273,10 +307,53 @@ def set_coastlines(last=False):
 		if len(intersect) > 0:
 			t = list(intersect)[random.randint(0,len(intersect)-1)]
 			new_map[l_tile['y']][l_tile['x']] = t
-			if t == '10' and last:
+			if t in ['0D','0E','0F','10','1B','1C','1D','1E','1F'] and last:
 				river_spawn_points.append(l_tile)
 		elif not last:
 			new_map[l_tile['y']][l_tile['x']] = '0' + str(random.randint(1,4))
+
+river_ext_pts = []
+
+def spawn_rivers():
+	rivers_spawned = 0
+	while rivers_spawned < rivers:
+		spawn_point_idx = random.randint(0,len(river_spawn_points)-1)
+		spawn_point = river_spawn_points[spawn_point_idx]
+		new_map[spawn_point['y']][spawn_point['x']] = river_spawn_tiles[new_map[spawn_point['y']][spawn_point['x']]]
+		river_ext_pts.append(river_spawn_points[spawn_point_idx])
+		del river_spawn_points[spawn_point_idx]
+		rivers_spawned += 1
+
+def extend_rivers():
+	i = 0
+	while len(river_ext_pts) > 0:
+		river_ext_pt_idx = random.randint(0,len(river_ext_pts)-1)
+		river_ext_pt = river_ext_pts[river_ext_pt_idx]
+		adjacents = get_adjacent_no_diagonal(river_ext_pt['x'],river_ext_pt['y'])
+		for adjacent in adjacents:
+			
+			if not new_map[adjacent['y']][adjacent['x']] in ['01','02','03','04'] and tiles[new_map[river_ext_pt['y']][river_ext_pt['x']]][adjacent['d']] == 'R':
+				if not new_map[adjacent['y']][adjacent['x']] in coastal_tiles:
+					if not new_map[adjacent['y']][adjacent['x']] in river_tiles:
+						bag_of_rivers = []
+						for river_tile in river_tiles:
+							if tiles[river_tile][opposing[adjacent['d']]] == 'R':
+								bag_of_rivers.append(river_tile)
+						new_map[adjacent['y']][adjacent['x']] = bag_of_rivers[random.randint(0,len(bag_of_rivers)-1)]
+						ext_adjacents = get_adjacent_no_diagonal(river_ext_pt['x'],river_ext_pt['y'])
+						for ext_adjacent in ext_adjacents:
+							if tiles[new_map[adjacent['y']][adjacent['x']]][opposing[ext_adjacent['d']]] == 'R':
+								river_ext_pts.append(ext_adjacent)
+					else:
+						pass
+				else:
+					if new_map[adjacent['y']][adjacent['x']] in river_spawn_tiles:
+						new_map[adjacent['y']][adjacent['x']] = river_spawn_tiles[new_map[adjacent['y']][adjacent['x']]]
+
+		del river_ext_pts[river_ext_pt_idx]
+		i += 1
+
+
 
 def write_file():
 	f = open("out.txt", "w")
@@ -287,12 +364,22 @@ def write_file():
 	f.truncate()
 	f.close()
 
+print 'Creating map'
 new_map = create_sea()
+print 'Seeding continents'
 seed_continents()
+print 'Building continents'
 build_continents()
+print 'Shaping coastlines'
 i = 0
 while not i == reset_coastline_num-2:
 	set_coastlines()
 	i += 1
 set_coastlines(True)
+print "Spawning rivers"
+spawn_rivers()
+print "Extending rivers"
+extend_rivers()
+print "Writing to file"
 write_file()
+print 'Done.'

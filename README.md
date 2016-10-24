@@ -9,7 +9,7 @@ Python script for generating World of Exploration DOS game random maps.
 4. In the same folder as the script an "out.txt" file containing hexidemical code will be created.
 5. Copy the entire contents of out.txt.
 6. Open your favorite hex code editor and open a saved game.
-7. Overwrite the first 64000 bytes with the copied contents of out.txt. Adding any bytes to the file could corrupt the file.
+7. Overwrite the first 6400 bytes with the copied contents of out.txt. Adding any bytes to the file could corrupt the file.
 
 Also included is a zip file (expcd) that can be installed on DOSBox using the following commands. Create a "dos" folder somewhere on you computer before starting DOSBox:
 
@@ -25,16 +25,16 @@ Also included is a zip file (expcd) that can be installed on DOSBox using the fo
 
 Todos
 
-1. Fix coastal tiles, corners are not rendering correctly
-2. Add support for remaining land tiles - mountains, deserts, tundra, and ice
-3. Add support for modulating the probability that tiles will appear, ice < grass
-4. Set indian villages and incan cities to spawn on land
-5. Set homeports to spawn on appropriate coastal regions
-6. Set ships to spawn in homeports
-7. Support for setting beginning variables such as money, items, ships, starting settlements, etc.
-8. Support for beginning percentage of map discovered by all players - currently setting the map discovery region to hex code 1F for all bytes reveals the entire world to all players
-9. Command line prompt for all continents and land mass
-10. Write to full saved file and write straight to hex code
+* River spawning from coastlines to termination
+* Add multi-tile land tiles - mountains, deserts, tundra, and ice
+* Add support for modulating the probability that tiles will appear, ice < grass
+* Set indian villages and incan cities to spawn on land
+* Set homeports to spawn on appropriate coastal regions
+* Set ships to spawn in homeports
+* Support for setting beginning variables such as money, items, ships, starting settlements, etc.
+* Support for beginning percentage of map discovered by all players - currently setting the map discovery region to hex code 1F for all bytes reveals the entire world to all players
+* Command line prompt for variables
+* Write to full saved file and write straight to hex code
 
 Why?
 

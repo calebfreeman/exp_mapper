@@ -9,6 +9,18 @@ Python script for generating World of Exploration DOS game random maps
 6. Open your favorite hex code editor and open a saved game.
 7. Overwrite the first 64000 bytes with the copied contents of out.txt. Adding any bytes to the file could corrupt the file.
 
+Also included is a zip file (expcd) that can be installed on DOSBox using the following commands. Create a "dos" folder somewhere on you computer before starting DOSBox:
+
+1. "MOUNT D /path/to/expcd"
+2. "MOUNT C /path/to/dos"
+3. "D:"
+4. "INSTALL.EXE"
+5. Follow the prompts to install
+6. "C:"
+7. "cd EXPLORE"
+8. "exp.exe"
+9. The intro screen for the game should appear, click to continue.
+
 Todos
 
 1. Fix coastal tiles, corners are not rendering correctly

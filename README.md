@@ -3,8 +3,11 @@ Python script for generating World of Exploration DOS game random maps
 
 1. Set the number of continents you want using the variable "continents". This sets the number of land spawn seeds.
 2. Set the percentage of landmass you want using the variable "land_perc". This limits the number of land tiles created.
-3. Run the script using "python generate_map.py"
-4. In the same folder as the script an "out.txt" file containing hexidemical code will be created. Copy this file into a saved game to overwrite the existing map in that game. Overwrite the first 64000 bytes, no more and no less, otherwise the saved file will be corrupted.
+3. Run the script using "python generate_map.py".
+4. In the same folder as the script an "out.txt" file containing hexidemical code will be created.
+5. Copy the entire contents of out.txt.
+6. Open your favorite hex code editor and open a saved game.
+7. Overwrite the first 64000 bytes with the copied contents of out.txt. Adding any bytes to the file could corrupt the file.
 
 Todos
 

@@ -314,6 +314,7 @@ def build_continents():
 
 
 def set_coastlines(last):
+	set_to_sea = 0
 	#random.shuffle(land_tiles)
 	for l_tile in land_tiles:
 		sets = []
@@ -328,8 +329,10 @@ def set_coastlines(last):
 				river_spawn_points.append(l_tile)
 		elif not last:
 			new_map[l_tile['y']][l_tile['x']] = '0' + str(random.randint(1,4))
+			set_to_sea += 1
 		if last and new_map[l_tile['y']][l_tile['x']] == 'FF':
 			inland_regions.append(l_tile)
+	return set_to_sea
 
 
 def set_inland_features():
@@ -354,9 +357,6 @@ def form_inland_features():
 			new_map[l_tile['y']][l_tile['x']] = ls[random.randint(0,len(ls)-1)]
 			ret += 1
 	return ret
-
-
-
 
 
 def spawn_rivers():
@@ -510,19 +510,20 @@ seed_continents()
 print 'Building continents'
 build_continents()
 print 'Shaping coastlines'
-i = 0
-while not i == 5:
-	set_coastlines(False)
-	i += 1
+sea = 6400 - len(land_tiles)
+while sea > 2:
+	#print sea
+	sea = set_coastlines(False)
 set_coastlines(True)
+#print sea
 
 print "Creating inland features"
 #set_inland_features()
 ff = len(inland_regions)
-i = 0
-while ff > 5:
+while ff > 2:
+	#print ff
 	ff = form_inland_features()
-	i += 1
+#print ff
 
 #set_coastlines(True)
 #print "Spawning rivers"

@@ -25,16 +25,16 @@ Also included is a zip file (expcd) that can be installed on DOSBox using the fo
 
 Todos
 
-* Add multi-tile land tiles - mountains, deserts, tundra, and ice
-* Add support for modulating the probability that tiles will appear, ice < grass
+* Create seed based algorithm for larger deserts, prairies, and forests
+* Try using different types of virtual tiles to expand deserts, prairies, and forests
 * Set homeports to spawn on appropriate coastal regions
+* Add support for modulating the probability that tiles will appear, particularly rivers on coastline
 * Set ships to spawn in homeports
 * Support for setting beginning variables such as money, items, ships, starting settlements, etc.
-* Command line prompt for variables
-* Write to full saved file and write straight to hex code
 * Optimize preformance and organize code
-* End river with appropriate tile if nowhere to go
 * Set indian and incan village variables
+* Add support for generating ice
+* Prompt with list of preset options - small islands, large islands, single continent, etc
 
 Why?
 
@@ -42,12 +42,11 @@ I started this because I loved this game as a kid and I am currently trying to l
 
 How it works:
 
-1. The script starts by creating an 80x80 ocean. There are 4 ocean tiles with hex codes: 01, 02, 03, 04
-2. It then chooses continent spawn points depending on how many you set and creates generic land tiles in those spawn points
-3. From the continent spawn points the script randomly chooses tiles adjacent to existing land tiles to build continents
-4. Continents build until the number of land tiles hits the set threshold
-5. The script then iterates through each land tile
-6. For each land tile all 8 adjacent tiles (up, down, and diagonal) are identified, each adjacent tile contributes a set of acceptable tiles based on the position of the adjacent tile in respect to the tile in question, an intersection of all acceptable adjacent tile sets is run, a tile is randomly chosen from the resulting set.
-7. If no intersection can be found then a tile may not exist. The game doesn't account for certain coastal configurations. In this case the land tile is set to a sea tile. Setting tiles with unknown configurations to sea tiles allows for the normalization of coastal configurations, thus decreasing the number of coastal tile errors.
-8. Run step 6 two more times to account for the fact that sea tiles may have been written after adjacent land tiles were chosen. 
-9. Write to out.txt and exit
+1. The script starts by creating an 80x80 ocean. There are 4 ocean tiles with hex codes: 01, 02, 03, 04.
+2. It then chooses continent spawn points depending on how many you set and creates generic land tiles in those spawn points. The more spawn points the more scattered the landmass. The less spawn points the more consolidated the landmass. Values between 1 and 1000 are recommended.
+3. From the continent spawn points the script randomly chooses tiles adjacent to existing land tiles to build continents, this uses a virtual universal land tile: FF. It's a virtual tile because it does not exist in the game. It shows up as a black spot, but it's set in the script to act as a universal land tile that accepts any other type of land type: rivers, mountains, etc.
+4. Continents build until the number of land tiles hits the set threshold using univeral virtual land tiles.
+5. The script then iterates through each land tile to set coastlines. If a coastline configuration cannot be tiled then that tile is set to ocean. This process is run until it reaches an inaccuracy threshold of 2 tiles or less out of 6400. A threshold of 2 or less is set because in rare cases there are configurations that are too expensive to correct causing the script to hang. On the last run inland tiles are added to a seperate list.
+6. For each inland tile all 8 adjacent tiles (up, down, and diagonal) are identified, each adjacent tile contributes a set of acceptable tiles based on the position of the adjacent tile in respect to the tile in question, an intersection of all acceptable adjacent tile sets is run, a tile is randomly chosen from the resulting set.
+7. If no intersection can be found then the tile is set to a generic land tile - not mountains, rivers, prairie, or desert. Doing so allows the algorithm to iterate to a solution within about 5 iterations with only 0-2 inaccuracies out of 6400 tiles. Other options were explored such as using the universal land tile and randomly selecting inland tiles. Using those options the algorithm would iterate infinitely without ever finding an accurate solution.
+8. Random map data is written to a saved game file in the directory defined within config.py using the user defined filename.

@@ -4,30 +4,33 @@ import binascii
 import sys
 from config import save_dir
 
+# Initial variables
 testing = False
 
 filepath = save_dir + str(raw_input("Path & filename for saved game ('RANDOM'): ") or "RANDOM")
-# Initial variables
 reveal_map = str(raw_input('Reveal map for all players? (Yn):') or 'Y')
 reveal = False
 if reveal_map == 'Y' or reveal_map =='Yes' or reveal_map == 'yes' or reveal_map == 'y':
 	reveal = True
-
 x_len = 80
 y_len = 80
-land_perc = float(raw_input('Land percentage (40): ') or 40)/100
+land_perc = float(raw_input('Land percentage (60): ') or 60)/100
 land_num_tiles = land_perc * x_len * y_len
-continents = int(raw_input('Continent Seeds (3): ') or 3)
-rivers = int(raw_input('River Seeds (10): ') or 10)
+continents = int(raw_input('Continent Seeds (50): ') or 50)
+rivers = int(raw_input('River Seeds (30): ') or 30)
 river_length = 2
 new_map = []
 reset_coastline_num = 4
 land_tiles = []
+inland_regions = []
 land_tile_options = []
 chosen_land_tiles = []
 river_spawn_points = []
+river_ext_pts = []
 all_tiles = ['01','02','03','04','05','06','07','08','09','0A','0B','0C','0D','0E','0F','10','11','12','13','14','15','16','17','18','19','1A','1B','1C','1D','1E','1F','20','21','22','23','24','25','26','27','28','29','2A','2B','2C','2D','2E','2F','30','31','32','33','34','35','36','37','38','39','3A','3B','3C','3D','3E','3F','40','41','42','43','44','45','46','47','48','49','4A','4B','4C','4D','4E','4F','50','51','52','53','54','55','56','57','58','59','5A','5B','5C','5D','5E','5F','60','61','62','63','64','65','66','67','68','69','6A','6B','6C','6D','6E','6F','70','71','72','73','74']
 sea_all = ['01','02','03','04']
+features = ['19','1A','1B','1C','1D','1E','1F','22','23','24','25','26','27','28','29','2A','2B','2C','2D','2E','2F','30','31','32','33','34','35','36','37','38','39','3A','3B','3C','3D','3E','3F','40','41','42','43','48','49','4A','4B','4C','4D','4E','4F','50','51','52','53','54','55','56','57','58','59','5A','5B','5C','5D','5E']
+ls = ['19','1A','1B','1C','1D','1E','1F']
 
 opposing = {
 	't':'b',
@@ -49,7 +52,8 @@ river_spawn_tiles = {
 	'1C' : '48',
 	'1D' : '49',
 	'1E' : '4A',
-	'1F' : '4B'
+	'1F' : '4B',
+	'17' : '47'
 	
 }
 
@@ -59,8 +63,6 @@ river_tiles = ['3D','3C','3E','3F','40','41','43','48','49','4A','4B']
 
 for each in range(river_length):
 	river_tiles = ['3C','3E','3F','40','41'] + river_tiles
-
-
 
 #river_tiles = ['3C','3E','3F','40','41','43','48','49','4A','4B'] # Even probability, 42 & 3D removed
 
@@ -98,31 +100,31 @@ tiles = {
 	'1F':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'20':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
 	'21':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'22':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'23':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'24':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'25':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
+	'22':{'t':'L','tr':'L','r':'H','br':'H','b':'H','bl':'L','l':'L','tl':'L'},
+	'23':{'t':'L','tr':'L','r':'L','br':'L','b':'H','bl':'H','l':'H','tl':'L'},
+	'24':{'t':'H','tr':'H','r':'H','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
+	'25':{'t':'H','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'H','tl':'H'},
 	'26':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'27':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'28':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'29':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'2A':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'2B':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'2C':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'2D':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'2E':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
+	'2B':{'t':'L','tr':'L','r':'M','br':'M','b':'M','bl':'L','l':'L','tl':'L'},
+	'2C':{'t':'L','tr':'L','r':'L','br':'L','b':'M','bl':'M','l':'M','tl':'L'},
+	'2D':{'t':'M','tr':'M','r':'M','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
+	'2E':{'t':'M','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'M','tl':'M'},
 	'2F':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'30':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'31':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'32':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'33':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'34':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'35':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'36':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'37':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'38':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'39':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'3A':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
+	'31':{'t':'F','tr':'F','r':'F','br':'F','b':'F','bl':'L','l':'L','tl':'L'},
+	'32':{'t':'F','tr':'F','r':'F','br':'F','b':'F','bl':'F','l':'F','tl':'F'},
+	'33':{'t':'F','tr':'L','r':'L','br':'L','b':'F','bl':'F','l':'F','tl':'F'},
+	'34':{'t':'L','tr':'L','r':'L','br':'L','b':'F','bl':'F','l':'F','tl':'L'},
+	'35':{'t':'L','tr':'L','r':'F','br':'F','b':'F','bl':'L','l':'L','tl':'L'},
+	'36':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
+	'37':{'t':'L','tr':'L','r':'F','br':'F','b':'F','bl':'F','l':'F','tl':'L'},
+	'38':{'t':'F','tr':'F','r':'F','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
+	'39':{'t':'F','tr':'F','r':'F','br':'L','b':'L','bl':'L','l':'F','tl':'F'},
+	'3A':{'t':'F','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'F','tl':'F'},
 	'3B':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'3C':{'t':'R','tr':'L','r':'L','br':'L','b':'R','bl':'L','l':'L','tl':'L'},
 	'3D':{'t':'R','tr':'L','r':'R','br':'L','b':'R','bl':'L','l':'L','tl':'L'},
@@ -149,16 +151,16 @@ tiles = {
 	'52':{'t':'P','tr':'P','r':'P','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
 	'53':{'t':'P','tr':'P','r':'P','br':'L','b':'L','bl':'L','l':'P','tl':'P'},
 	'54':{'t':'P','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'P','tl':'P'},
-	'55':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'56':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'57':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'58':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'59':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'5A':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'5B':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'5C':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'5D':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'5E':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
+	'55':{'t':'L','tr':'L','r':'D','br':'D','b':'D','bl':'L','l':'L','tl':'L'},
+	'56':{'t':'L','tr':'L','r':'D','br':'D','b':'D','bl':'D','l':'D','tl':'L'},
+	'57':{'t':'L','tr':'L','r':'L','br':'L','b':'D','bl':'D','l':'D','tl':'L'},
+	'58':{'t':'D','tr':'D','r':'D','br':'D','b':'D','bl':'L','l':'L','tl':'L'},
+	'59':{'t':'D','tr':'D','r':'D','br':'D','b':'D','bl':'D','l':'D','tl':'D'},
+	'5A':{'t':'D','tr':'D','r':'D','br':'D','b':'D','bl':'D','l':'D','tl':'D'},
+	'5B':{'t':'D','tr':'L','r':'L','br':'L','b':'D','bl':'D','l':'D','tl':'D'},
+	'5C':{'t':'D','tr':'D','r':'D','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
+	'5D':{'t':'D','tr':'D','r':'D','br':'L','b':'L','bl':'L','l':'D','tl':'D'},
+	'5E':{'t':'D','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'D','tl':'D'},
 	'5F':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
 	'60':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
 	'61':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
@@ -181,6 +183,7 @@ tiles = {
 	'72':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
 	'73':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
 	'74':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
+	'FF':{'t':'LHRMFPD','tr':'LHRMFPD','r':'LHRMFPD','br':'LHRMFPD','b':'LHRMFPD','bl':'LHRMFPD','l':'LHRMFPD','tl':'LHRMFPD'},
 }
 
 # Dynamically set tile_sets, can be replaced with static variable or separated from code
@@ -281,7 +284,7 @@ def seed_continents():
 		chosen_land_tiles.append(c['i'])
 		land_tile_options.extend(get_adjacent_no_diagonal(c['x'],c['y']))
 		land_tiles.append(c)
-		new_map[c['y']][c['x']] = '19' #land_all[random.randint(0,len(land_all)-1)]
+		new_map[c['y']][c['x']] = 'FF' #land_all[random.randint(0,len(land_all)-1)]
 
 
 
@@ -294,19 +297,30 @@ def build_continents():
 			cid = land_tile_options[idx]['i']
 		del land_tile_options[idx]
 		chosen_land_tiles.append(cid)
-		new_map[c['y']][c['x']] = '19' #land_all[random.randint(0,len(land_all)-1)]
+		new_map[c['y']][c['x']] = 'FF' #land_all[random.randint(0,len(land_all)-1)]
 		land_tiles.append(c)
+		#TODO: Optimize below for loop, objects cannot be compared using and if/in statement
 		for opt in get_adjacent_no_diagonal(c['x'],c['y']):
-			if opt not in land_tiles:
+			in_land_tiles = False
+			for tile in land_tiles:
+				if tile['x'] == opt['x'] and tile['y'] == opt['y']:
+					in_land_tiles = True
+					break
+			if not in_land_tiles:
 				land_tile_options.append(opt)
+			#if opt not in land_tiles:
+			#	land_tile_options.append(opt)
 
-def set_coastlines(last=False):
+
+
+def set_coastlines(last):
+	#random.shuffle(land_tiles)
 	for l_tile in land_tiles:
 		sets = []
 		#print l_tile
 		for adj in get_adjacent(l_tile['x'],l_tile['y']):
 			sets.append(set(tile_sets[new_map[adj['y']][adj['x']]][opposing[adj['d']]])) 
-		intersect = set(all_tiles).intersection(*sets)
+		intersect = set(coastal_tiles + ['FF'] + sea_all).intersection(*sets)
 		if len(intersect) > 0:
 			t = list(intersect)[random.randint(0,len(intersect)-1)]
 			new_map[l_tile['y']][l_tile['x']] = t
@@ -314,8 +328,36 @@ def set_coastlines(last=False):
 				river_spawn_points.append(l_tile)
 		elif not last:
 			new_map[l_tile['y']][l_tile['x']] = '0' + str(random.randint(1,4))
+		if last and new_map[l_tile['y']][l_tile['x']] == 'FF':
+			inland_regions.append(l_tile)
 
-river_ext_pts = []
+
+def set_inland_features():
+	for l_tile in inland_regions:
+		new_map[l_tile['y']][l_tile['x']] = 'FF'
+
+
+
+def form_inland_features():
+	random.shuffle(inland_regions)
+	ret = 0
+	for l_tile in inland_regions:
+		sets = []
+		#print l_tile
+		for adj in get_adjacent(l_tile['x'],l_tile['y']):
+			sets.append(set(tile_sets[new_map[adj['y']][adj['x']]][opposing[adj['d']]])) 
+		intersect = set(features).intersection(*sets)
+		if len(intersect) > 0:
+			t = list(intersect)[random.randint(0,len(intersect)-1)]
+			new_map[l_tile['y']][l_tile['x']] = t
+		else:
+			new_map[l_tile['y']][l_tile['x']] = ls[random.randint(0,len(ls)-1)]
+			ret += 1
+	return ret
+
+
+
+
 
 def spawn_rivers():
 	rivers_spawned = 0
@@ -334,7 +376,6 @@ def extend_rivers():
 		river_ext_pt = river_ext_pts[river_ext_pt_idx]
 		adjacents = get_adjacent_no_diagonal(river_ext_pt['x'],river_ext_pt['y'])
 		for adjacent in adjacents:
-			
 			if not new_map[adjacent['y']][adjacent['x']] in ['01','02','03','04'] and tiles[new_map[river_ext_pt['y']][river_ext_pt['x']]][adjacent['d']] == 'R':
 				if not new_map[adjacent['y']][adjacent['x']] in coastal_tiles:
 					if not new_map[adjacent['y']][adjacent['x']] in river_tiles:
@@ -470,17 +511,27 @@ print 'Building continents'
 build_continents()
 print 'Shaping coastlines'
 i = 0
-while not i == reset_coastline_num-2:
-	set_coastlines()
+while not i == 5:
+	set_coastlines(False)
 	i += 1
 set_coastlines(True)
-print "Spawning rivers"
-spawn_rivers()
-print "Extending rivers"
-extend_rivers()
-print "Creating mountains & valleys"
-find_inland_rows()
-find_inland_cols()
+
+print "Creating inland features"
+#set_inland_features()
+ff = len(inland_regions)
+i = 0
+while ff > 5:
+	ff = form_inland_features()
+	i += 1
+
+#set_coastlines(True)
+#print "Spawning rivers"
+#spawn_rivers()
+#print "Extending rivers"
+#extend_rivers()
+#print "Creating mountains & valleys"
+#find_inland_rows()
+#find_inland_cols()
 print "Building native villages & incan cities"
 villages = set_native_villages()
 print "Writing to file"

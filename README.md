@@ -1,13 +1,15 @@
 # exp_mapper
 Python script for generating World of Exploration DOS game random maps.
 
-1. Set the number of continents you want using the variable "continents". This sets the number of land spawn seeds.
-2. Set the percentage of landmass you want using the variable "land_perc". This limits the number of land tiles created.
-3. Run the script using "python generate_map.py".
-4. In the same folder as the script an "out.txt" file containing hexidemical code will be created.
-5. Copy the entire contents of out.txt.
-6. Open your favorite hex code editor and open a saved game.
-7. Overwrite the first 6400 bytes with the copied contents of out.txt. Adding any bytes to the file could corrupt the file.
+How to use:
+
+1. Download repository
+2. Edit config.py, set save_dir to the path your Exploration saved games directory
+2. Run "python generate_map.py"
+3. Follow the prompts to choose a filename and set random map variables
+4. A saved game will be created or overwrite an existing saved game depending on your filename input
+5. If you have Exploration open and the file is a new saved game file (not overwriting an existing saved game) then you will need to unmount the C drive in DOSBox "MOUNT -u C:" then remount the drive. Otherwise the saved file will not appear.
+6. Open Exploration and load the new saved game
 
 Also included is a zip file (expcd) that can be installed on DOSBox using the following commands. Create a "dos" folder somewhere on you computer before starting DOSBox:
 
@@ -23,17 +25,16 @@ Also included is a zip file (expcd) that can be installed on DOSBox using the fo
 
 Todos
 
-* River spawning from coastlines to termination
 * Add multi-tile land tiles - mountains, deserts, tundra, and ice
 * Add support for modulating the probability that tiles will appear, ice < grass
-* Set indian villages and incan cities to spawn on land
 * Set homeports to spawn on appropriate coastal regions
 * Set ships to spawn in homeports
 * Support for setting beginning variables such as money, items, ships, starting settlements, etc.
-* Support for beginning percentage of map discovered by all players - currently setting the map discovery region to hex code 1F for all bytes reveals the entire world to all players
 * Command line prompt for variables
 * Write to full saved file and write straight to hex code
 * Optimize preformance and organize code
+* End river with appropriate tile if nowhere to go
+* Set indian and incan village variables
 
 Why?
 

@@ -26,6 +26,7 @@ Also included is a zip file (expcd) that can be installed on DOSBox using the fo
 Todos
 
 * Create seed based algorithm for larger deserts, prairies, and forests
+* Create ice spawn points & function to set ice coastlines
 * Try using different types of virtual tiles to expand deserts, prairies, and forests
 * Set homeports to spawn on appropriate coastal regions
 * Add support for modulating the probability that tiles will appear, particularly rivers on coastline

@@ -59,7 +59,7 @@ river_spawn_tiles = {
 }
 
 homeport_tiles = {
-	'0D': '10', #sea on left
+	'0D': '09', #sea on left
 	'0E' : '0A', #sea on bottom
 	'0F' : '0B', #sea on right
 	'10' : '0C', #sea on top
@@ -479,10 +479,11 @@ def set_native_villages():
 							print 'added HP', x, y
 							villages_layer += hp_tile['hex']
 							skip = True
-				if not skip:
+				if not skip and len(cities) >= (len(native_villages) + len(incan_cities)):
+					print (len(native_villages) + len(incan_cities))
 					num = random.randint(0,1000)
-					if num < 100:
-						if num < 15:
+					if num < 50:
+						if num < 5:
 							villages_layer += '0D'
 							incan_cities.append({'x':x,'y':y})
 						else:
@@ -497,7 +498,75 @@ def set_native_villages():
 		villages_layer = test_string + villages_layer[512:]
 	return villages_layer
 
+hp_tiles = []
 
+def set_hps():
+	string = ''
+	p = 0
+	for hp in ['Sevilla','Lisbon','Amsterdam','London','Nantes']:
+		idx = random.randint(0,len(hp_spawn_points)-1)
+		y = hp_spawn_points[idx]['y']
+		x = hp_spawn_points[idx]['x']
+		print hp_spawn_points[idx]
+		print new_map[y][x]
+		print hp
+		hp_tiles.append({'hex':homeport_tiles[new_map[y][x]],'x':x,'y':y})
+		#new_map[y][x] = homeport_tiles[new_map[y][x]]
+		del hp_spawn_points[idx]
+		spaces = 16 - len(hp)
+		string += hp.encode('hex') + ('0'*spaces*2)
+		string += '0900' + '0' + str(p) + '00'
+		print p
+		print x,y
+		string += hex(x)[2:] + ('0' * (8-len(hex(x)[2:])))
+		string += hex(y)[2:] + ('0' * (8-len(hex(y)[2:])))
+		pop = random.randint(5000,20000)
+		string += hex(pop)[2:] + ('0' * (8-len(hex(pop)[2:])))
+		string += '0000F0038B038B01BB013C00B5002800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000D430000064000000'
+		p += 1
+	return string
+
+def set_cities():
+	string = ''
+	idx = 0
+	for native_village in native_villages:
+		print len(native_villages), len(cities), idx
+		y = native_village['y']
+		x = native_village['x']
+		city = cities[idx]
+		spaces = 16 - len(city)
+		string += city.encode('hex') + ('0'*spaces*2)
+		string += '0000' + '0500'
+		print x,y
+		string += hex(x)[2:] + ('0' * (8-len(hex(x)[2:])))
+		string += hex(y)[2:] + ('0' * (8-len(hex(y)[2:])))
+		pop = random.randint(20,200)
+		string += hex(pop)[2:] + ('0' * (8-len(hex(pop)[2:])))
+		string += '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000019000000'
+		idx += 1
+	for incan_city in incan_cities:
+		y = incan_city['y']
+		x = incan_city['x']
+		city = cities[idx]
+		spaces = 16 - len(city)
+		string += city.encode('hex') + ('0'*spaces*2)
+		string += '0D00' + '0000'
+		print x,y
+		string += hex(x)[2:] + ('0' * (8-len(hex(x)[2:])))
+		string += hex(y)[2:] + ('0' * (8-len(hex(y)[2:])))
+		pop = random.randint(20,200)
+		string += hex(pop)[2:] + ('0' * (8-len(hex(pop)[2:])))
+		string += '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000019000000'
+		idx += 1
+	while idx < 100:
+		city = cities[idx]
+		spaces = 16 - len(city)
+		string += city.encode('hex') + ('0'*spaces*2)
+		string += '0000FFFF000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000019000000'
+		idx += 1
+
+
+	return string
 
 def write_file():
 	homeports = set_hps()
@@ -528,38 +597,12 @@ def write_file():
 	f.write(open('PLAYER_VARS.SAV', "r").read())
 	f.write(open('SHIPS.SAV', "r").read())
 	f.write(binascii.unhexlify(homeports))
+	f.write(binascii.unhexlify(set_cities()))
 	f.write(open('CITIES.SAV', "r").read())
 	#f.truncate()
 	f.close()
 
-hp_tiles = []
 
-def set_hps():
-	string = ''
-	p = 0
-	for hp in ['Sevilla','Lisbon','Amsterdam','London','Nantes']:
-		idx = random.randint(0,len(hp_spawn_points)-1)
-		y = hp_spawn_points[idx]['y']
-		x = hp_spawn_points[idx]['x']
-		print hp_spawn_points[idx]
-		print new_map[y][x]
-		hp_tiles.append({'hex':homeport_tiles[new_map[y][x]],'x':x,'y':y})
-		new_map[y][x] = homeport_tiles[new_map[y][x]]
-		del hp_spawn_points[idx]
-		spaces = 16 - len(hp)
-		string += hp.encode('hex') + ('0'*spaces*2)
-		string += '0900' + '0' + str(p) + '00'
-		string += hex(x)[2:] + ('0' * (8-len(hex(x)[2:])))
-		string += hex(y)[2:] + ('0' * (8-len(hex(y)[2:])))
-		pop = random.randint(5000,20000)
-		string += hex(pop)[2:] + ('0' * (8-len(hex(pop)[2:])))
-		string += '0000F0038B038B01BB013C00B5002800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000D430000064000000'
-		p += 1
-	return string
-
-def set_cities():
-
-	pass
 
 
 

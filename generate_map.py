@@ -4,6 +4,20 @@ import binascii
 import sys
 from config import save_dir, cities
 
+class bcolors:
+    PORTUGAL = '\033[95m'
+    FRANCE = '\033[94m'
+    HOLLAND = '\033[92m'
+    SPAIN = '\033[93m'
+    TEAL = '\033[96m'
+    ENGLAND = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+#print bcolors.HEADER + "Warning: No active frommets remain. Continue?" + bcolors.ENDC
+
+#30=black, 31=red, 32=green, 33=yellow, 34=blue, 35=magenta, 36=cyan, 37=white.
 
 # Initial variables
 testing = False
@@ -20,14 +34,8 @@ land_num_tiles = land_perc * x_len * y_len
 continents = int(raw_input('Continent Seeds (50): ') or 50)
 rivers = int(raw_input('River Seeds (30): ') or 30)
 river_length = 2
-new_map = []
 reset_coastline_num = 4
-land_tiles = []
-inland_regions = []
-land_tile_options = []
-chosen_land_tiles = []
-river_spawn_points = []
-river_ext_pts = []
+
 all_tiles = ['01','02','03','04','05','06','07','08','09','0A','0B','0C','0D','0E','0F','10','11','12','13','14','15','16','17','18','19','1A','1B','1C','1D','1E','1F','20','21','22','23','24','25','26','27','28','29','2A','2B','2C','2D','2E','2F','30','31','32','33','34','35','36','37','38','39','3A','3B','3C','3D','3E','3F','40','41','42','43','44','45','46','47','48','49','4A','4B','4C','4D','4E','4F','50','51','52','53','54','55','56','57','58','59','5A','5B','5C','5D','5E','5F','60','61','62','63','64','65','66','67','68','69','6A','6B','6C','6D','6E','6F','70','71','72','73','74']
 sea_all = ['01','02','03','04']
 features = ['19','1A','1B','1C','1D','1E','1F','22','23','24','25','26','27','28','29','2A','2B','2C','2D','2E','2F','30','31','32','33','34','35','36','37','38','39','3A','3B','3C','3D','3E','3F','40','41','42','43','48','49','4A','4B','4C','4D','4E','4F','50','51','52','53','54','55','56','57','58','59','5A','5B','5C','5D','5E']
@@ -343,6 +351,7 @@ def set_coastlines(last):
 			set_to_sea += 1
 		if last and new_map[l_tile['y']][l_tile['x']] == 'FF':
 			inland_regions.append(l_tile)
+	#print hp_spawn_points
 	return set_to_sea
 
 
@@ -466,7 +475,10 @@ def find_inland_cols():
 incan_cities = []
 native_villages = []
 
+
 def set_native_villages():
+	num_incan_cities = 0
+	num_native_villages = 0
 	villages_layer = ''
 	villages = ['00','0D']
 	for y in range(y_len):
@@ -476,19 +488,23 @@ def set_native_villages():
 				if new_map[y][x] in ['0D','0E','0F','10']:
 					for hp_tile in hp_tiles:
 						if hp_tile['x'] == x and hp_tile['y'] == y:
-							print 'added HP', x, y
+							#print 'added HP', x, y
 							villages_layer += hp_tile['hex']
 							skip = True
 				if not skip and len(cities) >= (len(native_villages) + len(incan_cities)):
-					print (len(native_villages) + len(incan_cities))
+					#print (len(native_villages) + len(incan_cities))
 					num = random.randint(0,1000)
 					if num < 50:
-						if num < 5:
+						if num_incan_cities < 7:
 							villages_layer += '0D'
 							incan_cities.append({'x':x,'y':y})
-						else:
+							num_incan_cities += 1
+						elif num_native_villages < 43:
 							villages_layer += '00'
 							native_villages.append({'x':x,'y':y})
+							num_native_villages += 1
+						else:
+							villages_layer += 'FF'
 					else:
 						villages_layer += 'FF'
 			else:
@@ -507,21 +523,21 @@ def set_hps():
 		idx = random.randint(0,len(hp_spawn_points)-1)
 		y = hp_spawn_points[idx]['y']
 		x = hp_spawn_points[idx]['x']
-		print hp_spawn_points[idx]
-		print new_map[y][x]
-		print hp
-		hp_tiles.append({'hex':homeport_tiles[new_map[y][x]],'x':x,'y':y})
+		#print hp_spawn_points[idx]
+		#print new_map[y][x]
+		#print hp
+		hp_tiles.append({'hp':hp,'hex':homeport_tiles[new_map[y][x]],'x':x,'y':y})
 		#new_map[y][x] = homeport_tiles[new_map[y][x]]
 		del hp_spawn_points[idx]
 		spaces = 16 - len(hp)
 		string += hp.encode('hex') + ('0'*spaces*2)
 		string += '0900' + '0' + str(p) + '00'
-		print p
-		print x,y
-		string += hex(x)[2:] + ('0' * (8-len(hex(x)[2:])))
-		string += hex(y)[2:] + ('0' * (8-len(hex(y)[2:])))
+		#print p
+		#print x,y
+		string += format(x, '02x') + ('0' * (8-len(format(x, '02x'))))
+		string += format(y, '02x') + ('0' * (8-len(format(y, '02x'))))
 		pop = random.randint(5000,20000)
-		string += hex(pop)[2:] + ('0' * (8-len(hex(pop)[2:])))
+		string += format(pop, '02x') + ('0' * (8-len(format(pop, '02x'))))
 		string += '0000F0038B038B01BB013C00B5002800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000D430000064000000'
 		p += 1
 	return string
@@ -529,33 +545,34 @@ def set_hps():
 def set_cities():
 	string = ''
 	idx = 0
+	for incan_city in incan_cities:
+		'''0D 00 05 00 05 00 00 00 10 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 09 00 3C 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 19 00 00 00'''
+		y = incan_city['y']
+		x = incan_city['x']
+		city = cities[idx]
+		spaces = 16 - len(city)
+		string += city.encode('hex') + ('0'*spaces*2)
+		string += '0D00' + '0500'
+		#print x,y
+		string += format(x, '02x') + ('0' * (8-len(format(x, '02x'))))
+		string += format(y, '02x') + ('0' * (8-len(format(y, '02x'))))
+		pop = random.randint(20,100)
+		string += format(pop, '02x') + ('0' * (8-len(format(pop, '02x'))))
+		string += '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000019000000'
+		idx += 1
 	for native_village in native_villages:
-		print len(native_villages), len(cities), idx
+		#print len(native_villages), len(cities), idx
 		y = native_village['y']
 		x = native_village['x']
 		city = cities[idx]
 		spaces = 16 - len(city)
 		string += city.encode('hex') + ('0'*spaces*2)
 		string += '0000' + '0500'
-		print x,y
-		string += hex(x)[2:] + ('0' * (8-len(hex(x)[2:])))
-		string += hex(y)[2:] + ('0' * (8-len(hex(y)[2:])))
-		pop = random.randint(20,200)
-		string += hex(pop)[2:] + ('0' * (8-len(hex(pop)[2:])))
-		string += '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000019000000'
-		idx += 1
-	for incan_city in incan_cities:
-		y = incan_city['y']
-		x = incan_city['x']
-		city = cities[idx]
-		spaces = 16 - len(city)
-		string += city.encode('hex') + ('0'*spaces*2)
-		string += '0D00' + '0000'
-		print x,y
-		string += hex(x)[2:] + ('0' * (8-len(hex(x)[2:])))
-		string += hex(y)[2:] + ('0' * (8-len(hex(y)[2:])))
-		pop = random.randint(20,200)
-		string += hex(pop)[2:] + ('0' * (8-len(hex(pop)[2:])))
+		#print x,y
+		string += format(x, '02x') + ('0' * (8-len(format(x, '02x'))))
+		string += format(y, '02x') + ('0' * (8-len(format(y, '02x'))))
+		pop = random.randint(20,100)
+		string += format(pop, '02x') + ('0' * (8-len(format(pop, '02x'))))
 		string += '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000019000000'
 		idx += 1
 	while idx < 100:
@@ -568,9 +585,118 @@ def set_cities():
 
 	return string
 
+def ship_vars():
+	end_ship = '140014000500050003000300140000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000C4090000FF000000'
+	#ship_name = hex(str(raw_input('Ship Name: ')) or "Sao Gabriele")[2:]
+	#ship_name = ship_name+('0' * ((8*5)-len(ship_name)))
+	ship_name = '53616F204761627269656C000000000000000000'
+	print "Ship codes:\n00 Caravel\n01 Carrak\n02 Galleon\n03 War Galleon (16th century)\n04 Merchant Galleon\n05 War Galleon (17th century)\n06 Fleute\n07 India Traveler\n08 Pinnace\n09 Man-of-War\n0A War Frigate\n0B Merchant Frigate"
+	ship_type = str(raw_input('Ship Type (00): ')) or '00'
+	ship_type = ship_type+('0' * (8-len(ship_type)))
+	num_men = format(int(raw_input('Number of men on ship (9): ') or 9), '02x')
+	num_men = num_men+('0' * (8-len(num_men)))
+	cannon = format(int(raw_input('Cannon on ship (4): ') or 4), '02x')
+	cannon = cannon+('0' * (8-len(cannon)))
+	starting_move_pts = format(int(raw_input('Initial ship move points (9): ') or 9), '02x')
+	starting_move_pts = starting_move_pts+('0' * (8-len(starting_move_pts)))
+	#['Sevilla','Lisbon','Amsterdam','London','Nantes']
+	#['Sao Gabriel','Sao Rafael','Berrio','Pinta','Nina']
+	ship_string = ''
+	for hp in hp_tiles:
+		print hp
+		for ship in ['Sao Gabriel','Sao Rafael','Berrio','Pinta','Nina']:
+			if hp['hp'] == 'Sevilla' and ship == 'Sao Gabriel':
+				ship_string += ship_name + ship_type + '00000000' + num_men + cannon + '64000000' + '64000000' + starting_move_pts
+				ship_string += format(hp['x'], '02x') + ('0' * (8-len(format(hp['x'], '02x'))))
+				ship_string += format(hp['y'], '02x') + ('0' * (8-len(format(hp['y'], '02x'))))
+				ship_string += '00000000'
+				ship_string += format(hp['x'], '02x') + ('0' * (8-len(format(hp['x'], '02x'))))
+				ship_string += format(hp['y'], '02x') + ('0' * (8-len(format(hp['y'], '02x'))))
+				ship_string += end_ship
+			if hp['hp'] == 'Lisbon' and ship == 'Sao Rafael':
+				ship_string += '53616F2052616661656C00000000000000000000' + ship_type + '01000000' + num_men + cannon + '64000000' + '64000000' + starting_move_pts
+				ship_string += format(hp['x'], '02x') + ('0' * (8-len(format(hp['x'], '02x'))))
+				ship_string += format(hp['y'], '02x') + ('0' * (8-len(format(hp['y'], '02x'))))
+				ship_string += '00000000'
+				ship_string += format(hp['x'], '02x') + ('0' * (8-len(format(hp['x'], '02x'))))
+				ship_string += format(hp['y'], '02x') + ('0' * (8-len(format(hp['y'], '02x'))))
+				ship_string += end_ship
+			if hp['hp'] == 'Amsterdam' and ship == 'Berrio':
+				ship_string += '42657272696F0000000000000000000000000000' + ship_type + '02000000' + num_men + cannon + '64000000' + '64000000' + starting_move_pts
+				ship_string += format(hp['x'], '02x') + ('0' * (8-len(format(hp['x'], '02x'))))
+				ship_string += format(hp['y'], '02x') + ('0' * (8-len(format(hp['y'], '02x'))))
+				ship_string += '00000000'
+				ship_string += format(hp['x'], '02x') + ('0' * (8-len(format(hp['x'], '02x'))))
+				ship_string += format(hp['y'], '02x') + ('0' * (8-len(format(hp['y'], '02x'))))
+				ship_string += end_ship
+			if hp['hp'] == 'London' and ship == 'Pinta':
+				ship_string += '50696E7461000000000000000000000000000000' + ship_type + '03000000' + num_men + cannon + '64000000' + '64000000' + starting_move_pts
+				ship_string += format(hp['x'], '02x') + ('0' * (8-len(format(hp['x'], '02x'))))
+				ship_string += format(hp['y'], '02x') + ('0' * (8-len(format(hp['y'], '02x'))))
+				ship_string += '00000000'
+				ship_string += format(hp['x'], '02x') + ('0' * (8-len(format(hp['x'], '02x'))))
+				ship_string += format(hp['y'], '02x') + ('0' * (8-len(format(hp['y'], '02x'))))
+				ship_string += end_ship
+			if hp['hp'] == 'Nantes' and ship == 'Nina':
+				ship_string += '4E696E6100000000000000000000000000000000' + ship_type + '04000000' + num_men + cannon + '64000000' + '64000000' + starting_move_pts
+				ship_string += format(hp['x'], '02x') + ('0' * (8-len(format(hp['x'], '02x'))))
+				ship_string += format(hp['y'], '02x') + ('0' * (8-len(format(hp['y'], '02x'))))
+				ship_string += '00000000'
+				ship_string += format(hp['x'], '02x') + ('0' * (8-len(format(hp['x'], '02x'))))
+				ship_string += format(hp['y'], '02x') + ('0' * (8-len(format(hp['y'], '02x'))))
+				ship_string += end_ship
+
+	#ship_string += '53616F2052616661656C0000000000000000000000000000010000001D000000020000006400000064000000090000001C00000009000000000000001C00000009000000140014000500050003000300140000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000C4090000FF00000042657272696F000000000000000000000000000000000000020000001D000000020000006400000064000000090000002E0000000F000000000000002E0000000F000000140014000500050003000300140000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000C4090000FF00000050696E746100000000000000000000000000000000000000030000001D000000020000006400000064000000090000000000000030000000000000000000000030000000140014000500050003000300140000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000C4090000FF0000004E696E610000000000000000000000000000000000000000040000001D00000002000000640000006400000009000000080000002E00000000000000080000002E000000140014000500050003000300140000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000C4090000FF000000'
+	return ship_string
+
+
+def print_map():
+	print '\n  |00|01|02|03|04|05|06|07|08|09|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|74|75|76|77|78|79'
+	i = 0
+	y_cnt = 0
+	for y in new_map:
+		#print 'y',y'
+		i_str = str(i)
+		if len(i_str) < 2:
+			i_str = '0'+str(i)
+		row = i_str+'|'
+		x_cnt=0
+		for x in y:
+			#print 'x',x
+			hp_detected = False
+			#print hp_tiles
+			for hp in hp_tiles:
+				#print hp['x'],x_cnt
+				#print hp['y'],y_cnt
+				if hp['x'] == x_cnt and hp['y'] == y_cnt:
+					if hp['hp'] == 'Sevilla':
+						row += bcolors.SPAIN + "Sp" + bcolors.ENDC + "|"
+					if hp['hp'] == 'Lisbon':
+						row += bcolors.PORTUGAL + "Po" + bcolors.ENDC + "|"
+					if hp['hp'] == 'Amsterdam':
+						row += bcolors.HOLLAND + "Ho" + bcolors.ENDC + "|"
+					if hp['hp'] == 'London':
+						row += bcolors.ENGLAND + "En" + bcolors.ENDC + "|"
+					if hp['hp'] == 'Nantes':
+						row += bcolors.FRANCE + "Fr" + bcolors.ENDC + "|"
+					
+					hp_detected = True
+			if not hp_detected:
+				if x in sea_all:
+					row += '  |'
+				else:
+					row += '@@|'
+			x_cnt+=1
+		print row
+		i+=1
+		y_cnt+=1
+
 def write_file():
+
 	homeports = set_hps()
 	villages = set_native_villages()
+	mini_map_layer = villages.replace('00', '05').replace('0D', '05').replace('0B', 'FF').replace('09', 'FF').replace('0A', 'FF').replace('0C', 'FF')
+
 	f = open(filepath, "w+")
 	f.seek(0)
 	test_list = ['01','02','03','04','05','06','07','08','09','0a','0b','0c','0d','0e','0f','10','11','12','13','14','15','16','17','18','19','1a','1b','1c','1d','1e','1f','20','21','22','23','24','25','26','27','28','29','2a','2b','2c','2d','2e','2f','30','31','32','33','34','35','36','37','38','39','3a','3b','3c','3d','3e','3f','40','41','42','43','44','45','46','47','48','49','4a','4b','4c','4d','4e','4f','50','51','52','53','54','55','56','57','58','59','5a','5b','5c','5d','5e','5f','60','61','62','63','64','65','66','67','68','69','6a','6b','6c','6d','6e','6f','70','71','72','73','74','75', '76', '77', '78', '79', '7a', '7b', '7c', '7d', '7e', '7f', '80', '81', '82', '83', '84', '85', '86', '87', '88', '89', '8a', '8b', '8c', '8d', '8e', '8f', '90', '91', '92', '93', '94', '95', '96', '97', '98', '99', '9a', '9b', '9c', '9d', '9e', '9f', 'a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'aa', 'ab', 'ac', 'ad', 'ae', 'af', 'b0', 'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8', 'b9', 'ba', 'bb', 'bc', 'bd', 'be', 'bf', 'c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'ca', 'cb', 'cc', 'cd', 'ce', 'cf', 'd0', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'd9', 'da', 'db', 'dc', 'dd', 'de', 'df', 'e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'e8', 'e9', 'ea', 'eb', 'ec', 'ed', 'ee', 'ef', 'f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'fa', 'fb', 'fc', 'fd', 'fe', 'ff']
@@ -583,19 +709,19 @@ def write_file():
 		for map_col in map_row:
 			out += map_col
 		r += 1
-
 	f.write(binascii.unhexlify(out))
 	if reveal:
 		f.write(binascii.unhexlify('1F'*6400))
 	else:
 		f.write(binascii.unhexlify('00'*6400))
-	f.write(binascii.unhexlify('FF'*6400))
+	f.write(binascii.unhexlify(mini_map_layer))
 	f.write(binascii.unhexlify(villages))
 	f.write(binascii.unhexlify('FF'*6400))
 	f.write(binascii.unhexlify('FF'*6400))
 	f.write(binascii.unhexlify('FF'*6400))
 	f.write(open('PLAYER_VARS.SAV', "r").read())
-	f.write(open('SHIPS.SAV', "r").read())
+	f.write(binascii.unhexlify(ship_vars()))
+	f.write(open('UNUSED_SHIPS.SAV', "r").read())
 	f.write(binascii.unhexlify(homeports))
 	f.write(binascii.unhexlify(set_cities()))
 	f.write(open('CITIES.SAV', "r").read())
@@ -603,32 +729,52 @@ def write_file():
 	f.close()
 
 
+	
 
-
-
-
-print 'Creating map'
-new_map = create_sea()
-print 'Seeding continents'
-seed_continents()
-print 'Building continents'
-build_continents()
-print 'Shaping coastlines'
-sea = 6400 - len(land_tiles)
-while sea > 2:
+not_ready = True
+while not_ready:
+	new_map = []
+	land_tiles = []
+	inland_regions = []
+	land_tile_options = []
+	chosen_land_tiles = []
+	river_spawn_points = []
+	river_ext_pts = []
+	print '\nCreating map'
+	new_map = create_sea()
+	print 'Seeding continents'
+	seed_continents()
+	print 'Building continents'
+	build_continents()
+	print 'Shaping coastlines'
+	sea = 6400 - len(land_tiles)
+	while sea > 2:
+		#print sea
+		sea = set_coastlines(False)
+	set_coastlines(True)
 	#print sea
-	sea = set_coastlines(False)
-set_coastlines(True)
-#print sea
+	print "Creating inland features"
+	#set_inland_features()
+	ff = len(inland_regions)
+	while ff > 2:
+		#print ff
+		ff = form_inland_features()
 
-print "Creating inland features"
-#set_inland_features()
-ff = len(inland_regions)
-while ff > 2:
-	#print ff
-	ff = form_inland_features()
+	print "Building cities"
+	write_file()
+
+	preview = raw_input('Preview map?: (Yn)') or 'Y'
+	if preview in ['Y','y','yes','Yes']:
+		print_map()
+		ready = raw_input('Look good?: (Yn)') or 'Y'
+		if ready in ['Y','y','yes','Yes']:
+			not_ready = False
+	else:
+		not_ready = False
+
+
+
 #print ff
-print 
 #set_coastlines(True)
 #print "Spawning rivers"
 #spawn_rivers()
@@ -637,8 +783,9 @@ print
 #print "Creating mountains & valleys"
 #find_inland_rows()
 #find_inland_cols()
-print "Building native villages & incan cities"
 
-print "Writing to file"
-write_file()
+
+
+
+
 print 'Done.'

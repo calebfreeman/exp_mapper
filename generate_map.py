@@ -3,26 +3,16 @@ from itertools import *
 import binascii
 import sys
 from config import save_dir, cities
-
-class bcolors:
-    PORTUGAL = '\033[95m'
-    FRANCE = '\033[94m'
-    HOLLAND = '\033[92m'
-    SPAIN = '\033[93m'
-    TEAL = '\033[96m'
-    ENGLAND = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-#print bcolors.HEADER + "Warning: No active frommets remain. Continue?" + bcolors.ENDC
-
-#30=black, 31=red, 32=green, 33=yellow, 34=blue, 35=magenta, 36=cyan, 37=white.
+from static import tiles,all_tiles,sea_all,features,ls,opposing,river_spawn_tiles,homeport_tiles,coastal_tiles,river_tiles,inland_tiles,bcolors
 
 # Initial variables
 testing = False
-
-filepath = save_dir + str(raw_input("Path & filename for saved game ('RANDOM'): ") or "RANDOM")
+print "******************************************************************************************************************************"
+print "********************************************** EXPLORATION RANDOM MAP GENERATOR **********************************************"
+print "******************************************************************************************************************************"
+print "Notes: See config.py to set saved game directory. Set your terminal to a minimum of 243 columns to view map preview\n"
+print "***************************************************** SET MAP VARIABLES ******************************************************"
+filepath = save_dir + str(raw_input("Filename for saved game ('RANDOM'): ") or "RANDOM")
 reveal_map = str(raw_input('Reveal map for all players? (Yn):') or 'Y')
 reveal = False
 if reveal_map == 'Y' or reveal_map =='Yes' or reveal_map == 'yes' or reveal_map == 'y':
@@ -33,175 +23,12 @@ land_perc = float(raw_input('Land percentage (60): ') or 60)/100
 land_num_tiles = land_perc * x_len * y_len
 continents = int(raw_input('Continent Seeds (50): ') or 50)
 rivers = int(raw_input('River Seeds (30): ') or 30)
-river_length = 2
+river_length = 5
 reset_coastline_num = 4
-
-all_tiles = ['01','02','03','04','05','06','07','08','09','0A','0B','0C','0D','0E','0F','10','11','12','13','14','15','16','17','18','19','1A','1B','1C','1D','1E','1F','20','21','22','23','24','25','26','27','28','29','2A','2B','2C','2D','2E','2F','30','31','32','33','34','35','36','37','38','39','3A','3B','3C','3D','3E','3F','40','41','42','43','44','45','46','47','48','49','4A','4B','4C','4D','4E','4F','50','51','52','53','54','55','56','57','58','59','5A','5B','5C','5D','5E','5F','60','61','62','63','64','65','66','67','68','69','6A','6B','6C','6D','6E','6F','70','71','72','73','74']
-sea_all = ['01','02','03','04']
-features = ['19','1A','1B','1C','1D','1E','1F','22','23','24','25','26','27','28','29','2A','2B','2C','2D','2E','2F','30','31','32','33','34','35','36','37','38','39','3A','3B','3C','3D','3E','3F','40','41','42','43','48','49','4A','4B','4C','4D','4E','4F','50','51','52','53','54','55','56','57','58','59','5A','5B','5C','5D','5E']
-ls = ['19','1A','1B','1C','1D','1E','1F']
-
-opposing = {
-	't':'b',
-	'tr':'bl',
-	'r':'l',
-	'br':'tl',
-	'b':'t',
-	'bl':'tr',
-	'l':'r',
-	'tl':'br'
-}
-
-river_spawn_tiles = {
-	'0D': '44', #sea on left
-	'0E' : '46', #sea on bottom
-	'0F' : '47', #sea on right
-	'10' : '45', #sea on top
-	'1B' : '43',
-	'1C' : '48',
-	'1D' : '49',
-	'1E' : '4A',
-	'1F' : '4B',
-	'17' : '47'
-	
-}
-
-homeport_tiles = {
-	'0D': '09', #sea on left
-	'0E' : '0A', #sea on bottom
-	'0F' : '0B', #sea on right
-	'10' : '0C', #sea on top
-}
-
-coastal_tiles = ['01','02','03','04','05','06','07','08','09','0A','0B','0C','0D','0E','0F','10','11','12','13','14','15','16','17','18','44','45','46','47']
-inland_tiles = ['19','1A','1B','1C','1D','1E','1F','26','27','28','29','2A','2F','30','3B']
-river_tiles = ['3D','3C','3E','3F','40','41','43','48','49','4A','4B'] 
-
 for each in range(river_length):
-	river_tiles = ['3C','3E','3F','40','41'] + river_tiles
+	river_tiles += ['3C','3E','3F','40','41'] + river_tiles
 
 #river_tiles = ['3C','3E','3F','40','41','43','48','49','4A','4B'] # Even probability, 42 & 3D removed
-
-tiles = {
-	'01':{'t':'S','r':'S','b':'S','l':'S','tr':'S','br':'S','tl':'S','bl':'S'},
-	'02':{'t':'S','r':'S','b':'S','l':'S','tr':'S','br':'S','tl':'S','bl':'S'},
-	'03':{'t':'S','r':'S','b':'S','l':'S','tr':'S','br':'S','tl':'S','bl':'S'},
-	'04':{'t':'S','r':'S','b':'S','l':'S','tr':'S','br':'S','tl':'S','bl':'S'},
-	'05':{'t':'L','r':'L','b':'S','l':'S','tr':'L','br':'?','tl':'?','bl':'?'},
-	'06':{'t':'L','r':'S','b':'S','l':'L','tr':'?','br':'?','tl':'L','bl':'?'},
-	'07':{'t':'S','r':'S','b':'L','l':'L','tr':'?','br':'?','tl':'?','bl':'L'},
-	'08':{'t':'S','r':'L','b':'L','l':'S','tr':'?','br':'L','tl':'?','bl':'?'},
-	'09':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'S','l':'L','tl':'L'},
-	'0A':{'t':'L','tr':'L','r':'L','br':'S','b':'L','bl':'L','l':'L','tl':'L'},
-	'0B':{'t':'L','tr':'S','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'0C':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'S'},
-	'0D':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'?','l':'S','tl':'?'},
-	'0E':{'t':'L','tr':'L','r':'L','br':'?','b':'S','bl':'?','l':'L','tl':'L'},
-	'0F':{'t':'L','tr':'?','r':'S','br':'?','b':'L','bl':'L','l':'L','tl':'L'},
-	'10':{'t':'S','tr':'?','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'?'},
-	'11':{'t':'L','tr':'S','r':'L','br':'L','b':'L','bl':'S','l':'L','tl':'L'},
-	'12':{'t':'L','tr':'L','r':'L','br':'S','b':'L','bl':'L','l':'L','tl':'S'},
-	'13':{'t':'L','tr':'L','r':'L','br':'?','b':'S','bl':'?','l':'S','tl':'?'},
-	'14':{'t':'L','tr':'?','r':'S','br':'?','b':'S','bl':'?','l':'L','tl':'L'},
-	'15':{'t':'S','tr':'?','r':'S','br':'?','b':'L','bl':'L','l':'L','tl':'?'},
-	'16':{'t':'S','tr':'?','r':'L','br':'L','b':'L','bl':'?','l':'S','tl':'?'},
-	'17':{'t':'L','tr':'?','r':'S','br':'?','b':'L','bl':'L','l':'L','tl':'L'},
-	'18':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'?','l':'S','tl':'?'},
-	'19':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'1A':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'1B':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'1C':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'1D':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'1E':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'1F':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'20':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'21':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'22':{'t':'L','tr':'L','r':'H','br':'H','b':'H','bl':'L','l':'L','tl':'L'},
-	'23':{'t':'L','tr':'L','r':'L','br':'L','b':'H','bl':'H','l':'H','tl':'L'},
-	'24':{'t':'H','tr':'H','r':'H','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'25':{'t':'H','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'H','tl':'H'},
-	'26':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'27':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'28':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'29':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'2A':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'2B':{'t':'L','tr':'L','r':'M','br':'M','b':'M','bl':'L','l':'L','tl':'L'},
-	'2C':{'t':'L','tr':'L','r':'L','br':'L','b':'M','bl':'M','l':'M','tl':'L'},
-	'2D':{'t':'M','tr':'M','r':'M','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'2E':{'t':'M','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'M','tl':'M'},
-	'2F':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'30':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'31':{'t':'F','tr':'F','r':'F','br':'F','b':'F','bl':'L','l':'L','tl':'L'},
-	'32':{'t':'F','tr':'F','r':'F','br':'F','b':'F','bl':'F','l':'F','tl':'F'},
-	'33':{'t':'F','tr':'L','r':'L','br':'L','b':'F','bl':'F','l':'F','tl':'F'},
-	'34':{'t':'L','tr':'L','r':'L','br':'L','b':'F','bl':'F','l':'F','tl':'L'},
-	'35':{'t':'L','tr':'L','r':'F','br':'F','b':'F','bl':'L','l':'L','tl':'L'},
-	'36':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'37':{'t':'L','tr':'L','r':'F','br':'F','b':'F','bl':'F','l':'F','tl':'L'},
-	'38':{'t':'F','tr':'F','r':'F','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'39':{'t':'F','tr':'F','r':'F','br':'L','b':'L','bl':'L','l':'F','tl':'F'},
-	'3A':{'t':'F','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'F','tl':'F'},
-	'3B':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'3C':{'t':'R','tr':'L','r':'L','br':'L','b':'R','bl':'L','l':'L','tl':'L'},
-	'3D':{'t':'R','tr':'L','r':'R','br':'L','b':'R','bl':'L','l':'L','tl':'L'},
-	'3E':{'t':'L','tr':'L','r':'R','br':'L','b':'L','bl':'L','l':'R','tl':'L'},
-	'3F':{'t':'L','tr':'L','r':'R','br':'L','b':'R','bl':'L','l':'L','tl':'L'},
-	'40':{'t':'R','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'R','tl':'L'},
-	'41':{'t':'R','tr':'L','r':'R','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'42':{'t':'L','tr':'L','r':'L','br':'L','b':'R','bl':'L','l':'R','tl':'L'},
-	'43':{'t':'L','tr':'L','r':'L','br':'L','b':'R','bl':'L','l':'L','tl':'L'},
-	'44':{'t':'L','tr':'L','r':'R','br':'L','b':'L','bl':'?','l':'S','tl':'?'},
-	'45':{'t':'S','tr':'?','r':'L','br':'L','b':'R','bl':'L','l':'L','tl':'?'},
-	'46':{'t':'R','tr':'L','r':'L','br':'?','b':'S','bl':'?','l':'L','tl':'L'},
-	'47':{'t':'L','tr':'?','r':'S','br':'?','b':'L','bl':'L','l':'R','tl':'L'},
-	'48':{'t':'L','tr':'L','r':'L','br':'L','b':'R','bl':'L','l':'L','tl':'L'}, 
-	'49':{'t':'R','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'4A':{'t':'L','tr':'L','r':'R','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'4B':{'t':'L','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'R','tl':'L'},
-	'4C':{'t':'L','tr':'L','r':'P','br':'P','b':'P','bl':'L','l':'L','tl':'L'},
-	'4D':{'t':'L','tr':'L','r':'P','br':'P','b':'P','bl':'P','l':'P','tl':'L'},
-	'4E':{'t':'L','tr':'L','r':'L','br':'L','b':'P','bl':'P','l':'P','tl':'L'},
-	'4F':{'t':'P','tr':'P','r':'P','br':'P','b':'P','bl':'L','l':'L','tl':'L'},
-	'50':{'t':'P','tr':'P','r':'P','br':'P','b':'P','bl':'P','l':'P','tl':'P'},
-	'51':{'t':'P','tr':'L','r':'L','br':'L','b':'P','bl':'P','l':'P','tl':'P'},
-	'52':{'t':'P','tr':'P','r':'P','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'53':{'t':'P','tr':'P','r':'P','br':'L','b':'L','bl':'L','l':'P','tl':'P'},
-	'54':{'t':'P','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'P','tl':'P'},
-	'55':{'t':'L','tr':'L','r':'D','br':'D','b':'D','bl':'L','l':'L','tl':'L'},
-	'56':{'t':'L','tr':'L','r':'D','br':'D','b':'D','bl':'D','l':'D','tl':'L'},
-	'57':{'t':'L','tr':'L','r':'L','br':'L','b':'D','bl':'D','l':'D','tl':'L'},
-	'58':{'t':'D','tr':'D','r':'D','br':'D','b':'D','bl':'L','l':'L','tl':'L'},
-	'59':{'t':'D','tr':'D','r':'D','br':'D','b':'D','bl':'D','l':'D','tl':'D'},
-	'5A':{'t':'D','tr':'D','r':'D','br':'D','b':'D','bl':'D','l':'D','tl':'D'},
-	'5B':{'t':'D','tr':'L','r':'L','br':'L','b':'D','bl':'D','l':'D','tl':'D'},
-	'5C':{'t':'D','tr':'D','r':'D','br':'L','b':'L','bl':'L','l':'L','tl':'L'},
-	'5D':{'t':'D','tr':'D','r':'D','br':'L','b':'L','bl':'L','l':'D','tl':'D'},
-	'5E':{'t':'D','tr':'L','r':'L','br':'L','b':'L','bl':'L','l':'D','tl':'D'},
-	'5F':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'60':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'61':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'62':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'63':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'64':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'65':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'66':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'67':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'68':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'69':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'6A':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'6B':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'6C':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'6D':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'6E':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'6F':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'70':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'71':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'72':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'73':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'74':{'t':'','tr':'','r':'','br':'','b':'','bl':'','l':'','tl':''},
-	'FF':{'t':'LHRMFPD','tr':'LHRMFPD','r':'LHRMFPD','br':'LHRMFPD','b':'LHRMFPD','bl':'LHRMFPD','l':'LHRMFPD','tl':'LHRMFPD'},
-}
-
 # Dynamically set tile_sets, can be replaced with static variable or separated from code
 tile_sets = {}
 
@@ -477,12 +304,20 @@ native_villages = []
 
 
 def set_native_villages():
+	total_cities = int(land_perc * 0.84 * 100)
+	total_incan_cities = int(total_cities * .14)
+	total_native_villages = int(total_cities * .86)
+	total_land_tiles = int(6400 * land_perc)
+	print total_cities,total_incan_cities, total_native_villages
 	num_incan_cities = 0
 	num_native_villages = 0
 	villages_layer = ''
 	villages = ['00','0D']
+	perc_complete = 0
+	titles_processed = 0
 	for y in range(y_len):
 		for x in range(x_len):
+			titles_processed += 1
 			if new_map[y][x] in ['09','0A','0B','0C','0D','0E','0F','10','11','12','13','14','15','16','17','18','19','1A','1B']:
 				skip = False
 				if new_map[y][x] in ['0D','0E','0F','10']:
@@ -494,21 +329,27 @@ def set_native_villages():
 				if not skip and len(cities) >= (len(native_villages) + len(incan_cities)):
 					#print (len(native_villages) + len(incan_cities))
 					num = random.randint(0,1000)
-					if num < 50:
-						if num_incan_cities < 7:
-							villages_layer += '0D'
-							incan_cities.append({'x':x,'y':y})
-							num_incan_cities += 1
-						elif num_native_villages < 43:
+					if num < 100:
+						if num_native_villages < (total_native_villages*perc_complete):
 							villages_layer += '00'
 							native_villages.append({'x':x,'y':y})
 							num_native_villages += 1
+						else:
+							villages_layer += 'FF'
+					elif num > 970:
+						if num_incan_cities < (total_incan_cities*perc_complete):
+							villages_layer += '0D'
+							incan_cities.append({'x':x,'y':y})
+							num_incan_cities += 1
 						else:
 							villages_layer += 'FF'
 					else:
 						villages_layer += 'FF'
 			else:
 				villages_layer += 'FF'
+			perc_complete = float(titles_processed)/6400.00
+	print "Number of incan cities: ", num_incan_cities
+	print "Number of native villages: ", num_native_villages
 	if testing:
 		test_string = '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff'
 		villages_layer = test_string + villages_layer[512:]
@@ -549,6 +390,9 @@ def set_cities():
 		'''0D 00 05 00 05 00 00 00 10 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 09 00 3C 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 19 00 00 00'''
 		y = incan_city['y']
 		x = incan_city['x']
+		silver = format(random.randint(0,100), '02x')
+		gold = format(random.randint(0,100), '02x')
+		jewels = format(random.randint(0,24), '02x')
 		city = cities[idx]
 		spaces = 16 - len(city)
 		string += city.encode('hex') + ('0'*spaces*2)
@@ -558,7 +402,11 @@ def set_cities():
 		string += format(y, '02x') + ('0' * (8-len(format(y, '02x'))))
 		pop = random.randint(20,100)
 		string += format(pop, '02x') + ('0' * (8-len(format(pop, '02x'))))
-		string += '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000019000000'
+		string += ('0' * 48)
+		string += silver+('0' * (4-len(silver)))
+		string += gold+('0' * (4-len(gold)))
+		string += jewels+('0' * (4-len(jewels)))
+		string += '000000000000000000000000000000000000000000000000000000000000000000000000000019000000'
 		idx += 1
 	for native_village in native_villages:
 		#print len(native_villages), len(cities), idx
@@ -587,11 +435,9 @@ def set_cities():
 
 def ship_vars():
 	end_ship = '140014000500050003000300140000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000C4090000FF000000'
-	#ship_name = hex(str(raw_input('Ship Name: ')) or "Sao Gabriele")[2:]
-	#ship_name = ship_name+('0' * ((8*5)-len(ship_name)))
 	ship_name = '53616F204761627269656C000000000000000000'
 	print "Ship codes:\n00 Caravel\n01 Carrak\n02 Galleon\n03 War Galleon (16th century)\n04 Merchant Galleon\n05 War Galleon (17th century)\n06 Fleute\n07 India Traveler\n08 Pinnace\n09 Man-of-War\n0A War Frigate\n0B Merchant Frigate"
-	ship_type = str(raw_input('Ship Type (00): ')) or '00'
+	ship_type = str(raw_input('Choose your ship (00): ')) or '00'
 	ship_type = ship_type+('0' * (8-len(ship_type)))
 	num_men = format(int(raw_input('Number of men on ship (9): ') or 9), '02x')
 	num_men = num_men+('0' * (8-len(num_men)))
@@ -599,11 +445,8 @@ def ship_vars():
 	cannon = cannon+('0' * (8-len(cannon)))
 	starting_move_pts = format(int(raw_input('Initial ship move points (9): ') or 9), '02x')
 	starting_move_pts = starting_move_pts+('0' * (8-len(starting_move_pts)))
-	#['Sevilla','Lisbon','Amsterdam','London','Nantes']
-	#['Sao Gabriel','Sao Rafael','Berrio','Pinta','Nina']
 	ship_string = ''
 	for hp in hp_tiles:
-		print hp
 		for ship in ['Sao Gabriel','Sao Rafael','Berrio','Pinta','Nina']:
 			if hp['hp'] == 'Sevilla' and ship == 'Sao Gabriel':
 				ship_string += ship_name + ship_type + '00000000' + num_men + cannon + '64000000' + '64000000' + starting_move_pts
@@ -645,13 +488,11 @@ def ship_vars():
 				ship_string += format(hp['x'], '02x') + ('0' * (8-len(format(hp['x'], '02x'))))
 				ship_string += format(hp['y'], '02x') + ('0' * (8-len(format(hp['y'], '02x'))))
 				ship_string += end_ship
-
-	#ship_string += '53616F2052616661656C0000000000000000000000000000010000001D000000020000006400000064000000090000001C00000009000000000000001C00000009000000140014000500050003000300140000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000C4090000FF00000042657272696F000000000000000000000000000000000000020000001D000000020000006400000064000000090000002E0000000F000000000000002E0000000F000000140014000500050003000300140000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000C4090000FF00000050696E746100000000000000000000000000000000000000030000001D000000020000006400000064000000090000000000000030000000000000000000000030000000140014000500050003000300140000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000C4090000FF0000004E696E610000000000000000000000000000000000000000040000001D00000002000000640000006400000009000000080000002E00000000000000080000002E000000140014000500050003000300140000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000C4090000FF000000'
 	return ship_string
 
 
 def print_map():
-	print '\n  |00|01|02|03|04|05|06|07|08|09|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|74|75|76|77|78|79'
+	print '\n  |00|01|02|03|04|05|06|07|08|09|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|74|75|76|77|78|79|'
 	i = 0
 	y_cnt = 0
 	for y in new_map:
@@ -691,6 +532,19 @@ def print_map():
 		i+=1
 		y_cnt+=1
 
+def reveal_limited_map():
+	black_tiles = '00'*6400
+	player = 1
+	for hp in hp_tiles:
+		pointer = (((hp['y']*80)+hp['x'])*2)
+		black_tiles = black_tiles[:pointer]+format(player,'02x')+black_tiles[pointer+2:]
+		for adjacent in get_adjacent(hp['x'],hp['y']):
+			pointer = (((adjacent['y']*80)+adjacent['x'])*2)
+			black_tiles = black_tiles[:pointer]+format(player,'02x')+black_tiles[pointer+2:]
+		player = int(player*2)
+	return black_tiles
+
+
 def write_file():
 
 	homeports = set_hps()
@@ -713,19 +567,19 @@ def write_file():
 	if reveal:
 		f.write(binascii.unhexlify('1F'*6400))
 	else:
-		f.write(binascii.unhexlify('00'*6400))
+		f.write(binascii.unhexlify(reveal_limited_map()))
 	f.write(binascii.unhexlify(mini_map_layer))
 	f.write(binascii.unhexlify(villages))
 	f.write(binascii.unhexlify('FF'*6400))
 	f.write(binascii.unhexlify('FF'*6400))
 	f.write(binascii.unhexlify('FF'*6400))
+	print "\n******************************************************** SET USER VARIBLES ***************************************************"
 	f.write(open('PLAYER_VARS.SAV', "r").read())
 	f.write(binascii.unhexlify(ship_vars()))
 	f.write(open('UNUSED_SHIPS.SAV', "r").read())
 	f.write(binascii.unhexlify(homeports))
 	f.write(binascii.unhexlify(set_cities()))
 	f.write(open('CITIES.SAV', "r").read())
-	#f.truncate()
 	f.close()
 
 
@@ -740,7 +594,8 @@ while not_ready:
 	chosen_land_tiles = []
 	river_spawn_points = []
 	river_ext_pts = []
-	print '\nCreating map'
+	print "\n******************************************************** CREATING MAP ********************************************************"
+	print 'Creating oceans'
 	new_map = create_sea()
 	print 'Seeding continents'
 	seed_continents()
@@ -766,9 +621,9 @@ while not_ready:
 	preview = raw_input('Preview map?: (Yn)') or 'Y'
 	if preview in ['Y','y','yes','Yes']:
 		print_map()
-		ready = raw_input('Look good?: (Yn)') or 'Y'
-		if ready in ['Y','y','yes','Yes']:
-			not_ready = False
+		#ready = raw_input('Look good?: (Yn)') or 'Y'
+		#if ready in ['Y','y','yes','Yes']:
+		not_ready = False
 	else:
 		not_ready = False
 

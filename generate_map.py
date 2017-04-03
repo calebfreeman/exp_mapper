@@ -4,6 +4,7 @@ import binascii
 import sys
 from config import save_dir, cities
 from static import tiles,all_tiles,sea_all,features,ls,opposing,river_spawn_tiles,homeport_tiles,coastal_tiles,river_tiles,inland_tiles,bcolors
+import bitstring
 
 # Initial variables
 testing = False
@@ -13,7 +14,7 @@ print "*************************************************************************
 print "Notes: See config.py to set saved game directory. Set your terminal to a minimum of 243 columns to view map preview\n"
 print "***************************************************** SET MAP VARIABLES ******************************************************"
 filepath = save_dir + str(raw_input("Filename for saved game ('RANDOM'): ") or "RANDOM")
-reveal_map = str(raw_input('Reveal map for all players? (Yn):') or 'Y')
+reveal_map = str(raw_input('Reveal map for all players? (yN):') or 'N')
 reveal = False
 if reveal_map == 'Y' or reveal_map =='Yes' or reveal_map == 'yes' or reveal_map == 'y':
 	reveal = True
@@ -31,6 +32,11 @@ for each in range(river_length):
 #river_tiles = ['3C','3E','3F','40','41','43','48','49','4A','4B'] # Even probability, 42 & 3D removed
 # Dynamically set tile_sets, can be replaced with static variable or separated from code
 tile_sets = {}
+land_all = []
+hp_spawn_points = []
+incan_cities = []
+native_villages = []
+hp_tiles = []
 
 for tile in tiles:
 	if not tiles[tile]['t'] == '':
@@ -44,12 +50,10 @@ for tile in tiles:
 								tile_sets[tile][key].append(adjacent_tile)
 
 # Dynamically set land_all, can be replaced with static variable once all tiles are set or separated from code
-land_all = []
 
 for key, value in tiles.iteritems():
 	if not value['t'] == '':
 		land_all.append(key)
-
 
 # Find random continent seed location on map that has not already been written
 
@@ -119,7 +123,7 @@ def create_sea():
 	return ret
 
 
-# Choose
+# 
 def seed_continents():
 	for i in range(continents):
 		c = get_rand_unique_loc()
@@ -154,7 +158,7 @@ def build_continents():
 			#if opt not in land_tiles:
 			#	land_tile_options.append(opt)
 
-hp_spawn_points = []
+
 
 def set_coastlines(last):
 	set_to_sea = 0
@@ -184,7 +188,11 @@ def set_coastlines(last):
 
 def set_inland_features():
 	for l_tile in inland_regions:
-		new_map[l_tile['y']][l_tile['x']] = 'FF'
+		blocks = ['32','50','59','2B']
+		block = blocks[random.randint(0,len(blocks)-1)]
+		new_map[l_tile['y']][l_tile['x']] = block #'FF'
+
+
 
 
 
@@ -244,63 +252,7 @@ def extend_rivers():
 		del river_ext_pts[river_ext_pt_idx]
 		i += 1
 
-inland_rectangles = []
-def get_area():
-	random.randint(2,)
 
-inland_up_cols = []
-
-def find_inland_rows():
-	row = 0
-	inland_right_rows = []
-	for y in range(y_len):
-		col = 0
-		inland_right_rows.append([])
-		for x in range(x_len):
-			inland_right_rows[row].append(0)
-			if new_map[y][x] in inland_tiles:
-				inland_right_rows[row][col] = 1
-				valid = True
-				trace_x = x
-				while valid == True:
-					if trace_x == x_len-1:
-						trace_x = 0
-					else:
-						trace_x += 1
-					if new_map[y][trace_x] in inland_tiles:
-						inland_right_rows[row][col] += 1
-					else:
-						valid = False
-			col += 1
-		row += 1
-	#for r in inland_right_rows:
-	#	print r
-
-def find_inland_cols():
-	col = x_len-1
-	inland_up_cols = [[0 for x in xrange(x_len)] for x in xrange(y_len)]
-	while col >= 0:
-		row = y_len-1
-		while row >= 0:
-			if new_map[row][col] in inland_tiles:
-				inland_up_cols[row][col] = 1
-				valid = True
-				trace_y = row
-				while valid == True:
-					if trace_y == 0:
-						trace_y = y_len-1
-					else:
-						trace_y = trace_y-1
-					if new_map[trace_y][col] in inland_tiles:
-						inland_up_cols[row][col] += 1
-					else:
-						valid = False
-			row -= 1
-		col -= 1
-	#for r in inland_up_cols:
-	#	print r	
-incan_cities = []
-native_villages = []
 
 
 def set_native_villages():
@@ -355,7 +307,7 @@ def set_native_villages():
 		villages_layer = test_string + villages_layer[512:]
 	return villages_layer
 
-hp_tiles = []
+
 
 def set_hps():
 	string = ''
@@ -364,17 +316,11 @@ def set_hps():
 		idx = random.randint(0,len(hp_spawn_points)-1)
 		y = hp_spawn_points[idx]['y']
 		x = hp_spawn_points[idx]['x']
-		#print hp_spawn_points[idx]
-		#print new_map[y][x]
-		#print hp
 		hp_tiles.append({'hp':hp,'hex':homeport_tiles[new_map[y][x]],'x':x,'y':y})
-		#new_map[y][x] = homeport_tiles[new_map[y][x]]
 		del hp_spawn_points[idx]
 		spaces = 16 - len(hp)
 		string += hp.encode('hex') + ('0'*spaces*2)
 		string += '0900' + '0' + str(p) + '00'
-		#print p
-		#print x,y
 		string += format(x, '02x') + ('0' * (8-len(format(x, '02x'))))
 		string += format(y, '02x') + ('0' * (8-len(format(y, '02x'))))
 		pop = random.randint(5000,20000)
@@ -429,8 +375,6 @@ def set_cities():
 		string += city.encode('hex') + ('0'*spaces*2)
 		string += '0000FFFF000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000019000000'
 		idx += 1
-
-
 	return string
 
 def ship_vars():
@@ -546,7 +490,6 @@ def reveal_limited_map():
 
 
 def write_file():
-
 	homeports = set_hps()
 	villages = set_native_villages()
 	mini_map_layer = villages.replace('00', '05').replace('0D', '05').replace('0B', 'FF').replace('09', 'FF').replace('0A', 'FF').replace('0C', 'FF')
@@ -582,9 +525,6 @@ def write_file():
 	f.write(open('CITIES.SAV', "r").read())
 	f.close()
 
-
-	
-
 not_ready = True
 while not_ready:
 	new_map = []
@@ -609,10 +549,10 @@ while not_ready:
 	set_coastlines(True)
 	#print sea
 	print "Creating inland features"
-	#set_inland_features()
+	set_inland_features()
 	ff = len(inland_regions)
 	while ff > 2:
-		#print ff
+		print ff
 		ff = form_inland_features()
 
 	print "Building cities"
@@ -627,8 +567,6 @@ while not_ready:
 	else:
 		not_ready = False
 
-
-
 #print ff
 #set_coastlines(True)
 #print "Spawning rivers"
@@ -639,8 +577,59 @@ while not_ready:
 #find_inland_rows()
 #find_inland_cols()
 
-
-
-
-
 print 'Done.'
+
+
+# APPENDIX #
+
+inland_rectangles = []
+def get_area():
+	random.randint(2,)
+
+inland_up_cols = []
+
+def find_inland_rows():
+	row = 0
+	inland_right_rows = []
+	for y in range(y_len):
+		col = 0
+		inland_right_rows.append([])
+		for x in range(x_len):
+			inland_right_rows[row].append(0)
+			if new_map[y][x] in inland_tiles:
+				inland_right_rows[row][col] = 1
+				valid = True
+				trace_x = x
+				while valid == True:
+					if trace_x == x_len-1:
+						trace_x = 0
+					else:
+						trace_x += 1
+					if new_map[y][trace_x] in inland_tiles:
+						inland_right_rows[row][col] += 1
+					else:
+						valid = False
+			col += 1
+		row += 1
+
+def find_inland_cols():
+	col = x_len-1
+	inland_up_cols = [[0 for x in xrange(x_len)] for x in xrange(y_len)]
+	while col >= 0:
+		row = y_len-1
+		while row >= 0:
+			if new_map[row][col] in inland_tiles:
+				inland_up_cols[row][col] = 1
+				valid = True
+				trace_y = row
+				while valid == True:
+					if trace_y == 0:
+						trace_y = y_len-1
+					else:
+						trace_y = trace_y-1
+					if new_map[trace_y][col] in inland_tiles:
+						inland_up_cols[row][col] += 1
+					else:
+						valid = False
+			row -= 1
+		col -= 1

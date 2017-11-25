@@ -25,16 +25,17 @@ Also included is a zip file (expcd) that can be installed on DOSBox using the fo
 
 Todos
 
+* Set initial doubloons
+* Automatically set ship vars according to ship chosen
+* Set computer/human players
+* Better rivers (less river ends)
 * Create seed based algorithm for larger deserts, prairies, and forests
 * Create ice spawn points & function to set ice coastlines
 * Try using different types of virtual tiles to expand deserts, prairies, and forests
 * Set homeports to spawn on appropriate coastal regions
 * Add support for modulating the probability that tiles will appear, particularly rivers on coastline
-* Set ships to spawn in homeports
 * Support for setting beginning variables such as money, items, ships, starting settlements, etc.
 * Optimize preformance and organize code
-* Set indian and incan village variables
-* Add support for generating ice
 * Prompt with list of preset options - small islands, large islands, single continent, etc
 
 Why?

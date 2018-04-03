@@ -1,7 +1,11 @@
-# exp_mapper
-Python script for generating World of Exploration DOS game random maps.
+# Exploration Random Map Generator
+Python script for generating World of Exploration DOS game random maps using MacOSX and Python.
+
+Screenshots of random maps generated:
 
 ![alt text](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/map_preview.png)
+![alt text](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/map_preview_exp.png)
+
 
 How to use:
 

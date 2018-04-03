@@ -1,12 +1,18 @@
 # exp_mapper
 Python script for generating World of Exploration DOS game random maps.
 
+![alt text](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/map_preview.png)
+
 How to use:
 
 1. Download repository
 2. Edit config.py, set save_dir to the path your Exploration saved games directory
 2. Run "python generate_map.py"
 3. Follow the prompts to choose a filename and set random map variables
+
+![alt text](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/settings.png)
+
+
 4. A saved game will be created or overwrite an existing saved game depending on your filename input
 5. If you have Exploration open and the file is a new saved game file (not overwriting an existing saved game) then you will need to unmount the C drive in DOSBox "MOUNT -u C:" then remount the drive. Otherwise the saved file will not appear.
 6. Open Exploration and load the new saved game

@@ -1,10 +1,17 @@
 # Exploration Random Map Generator
-Python script for generating World of Exploration DOS game random maps using MacOSX and Python.
+Python script for generating and previewing World of Exploration DOS game random maps on MacOSX.
 
-Screenshots of random maps generated:
+Screenshots of random map previews and their in-game experience:
 
-![alt text](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/map_preview.png)
-![alt text](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/map_preview_exp.png)
+Mix of ocean and land, 60% land mass:
+
+![map preview](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/map_preview.png)
+![map preview in exploration](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/map_preview_exp.png)
+
+Small central ocean, large landmass:
+
+![map preview](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/small_ocean_preview.png)
+![map preview in exploration](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/small_ocean_game.png)
 
 
 How to use:
@@ -14,7 +21,7 @@ How to use:
 2. Run "python generate_map.py"
 3. Follow the prompts to choose a filename and set random map variables
 
-![alt text](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/settings.png)
+![alt text](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/settings.png)
 
 
 4. A saved game will be created or overwrite an existing saved game depending on your filename input
@@ -36,17 +43,13 @@ Also included is a zip file (expcd) that can be installed on DOSBox using the fo
 Todos
 
 * Set initial doubloons
-* Automatically set ship vars according to ship chosen
 * Set computer/human players
-* Better rivers (less river ends)
-* Create seed based algorithm for larger deserts, prairies, and forests
 * Create ice spawn points & function to set ice coastlines
-* Try using different types of virtual tiles to expand deserts, prairies, and forests
-* Set homeports to spawn on appropriate coastal regions
-* Add support for modulating the probability that tiles will appear, particularly rivers on coastline
 * Support for setting beginning variables such as money, items, ships, starting settlements, etc.
 * Optimize preformance and organize code
 * Prompt with list of preset options - small islands, large islands, single continent, etc
+* More consistent support for Windows
+* Python3 support
 
 Why?
 

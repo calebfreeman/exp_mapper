@@ -16,7 +16,7 @@ Small central ocean, large landmass (95% land, 5 continent spawn points):
 Big ocean, tiny islands (20% land, 1000 continent spawn points):
 
 ![map preview](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/islands_preview.png)
-![map preview in exploration](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/small_isalnds_game.png)
+![map preview in exploration](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/small_islands_game.png)
 
 
 How to use:

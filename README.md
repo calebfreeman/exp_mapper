@@ -3,12 +3,17 @@ Python script for generating and previewing World of Exploration DOS game random
 
 Screenshots of random map previews and their in-game experience:
 
-Mix of ocean and land, 60% land mass:
+Mix of ocean and land (60% land , 100 continent spawn points):
 
 ![map preview](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/map_preview.png)
 ![map preview in exploration](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/map_preview_exp.png)
 
-Small central ocean, large landmass:
+Small central ocean, large landmass (95% land, 5 continent spawn points):
+
+![map preview](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/small_ocean_preview.png)
+![map preview in exploration](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/small_ocean_game.png)
+
+Big ocean, tiny islands (20% land, 1000 continent spawn points):
 
 ![map preview](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/small_ocean_preview.png)
 ![map preview in exploration](https://raw.githubusercontent.com/calebfreeman/exp_mapper/master/screenshots/small_ocean_game.png)

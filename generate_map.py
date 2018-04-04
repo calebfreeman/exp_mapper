@@ -294,7 +294,6 @@ def set_native_villages():
 	total_incan_cities = int(total_cities * .14)
 	total_native_villages = int(total_cities * .86)
 	total_land_tiles = int(6400 * land_perc)
-	print total_cities,total_incan_cities, total_native_villages
 	num_incan_cities = 0
 	num_native_villages = 0
 	villages_layer = ''
